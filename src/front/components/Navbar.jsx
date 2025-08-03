@@ -1,97 +1,127 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/img/logo.jpeg";
 import useGlobalReducer from "../hooks/useGlobalReducer";
-import { useNavigate } from "react-router-dom";
-import { LuPawPrint } from "react-icons/lu";
+import { LuPawPrint, LuLogOut, LuUser, LuUserPlus, LuMoon, LuSun } from "react-icons/lu";
+import { useState } from "react";
 
 export const Navbar = () => {
-	const { store, dispatch } = useGlobalReducer();
-	const navigate = useNavigate()
-	const logoAnimal = logo
-	const handleLogout = () => {
-		localStorage.removeItem("token");
-		localStorage.removeItem("is_admin"); 
-		dispatch({ type: "Logout" });
-		navigate("/")
-	}
+  const { store, dispatch } = useGlobalReducer();
+  const navigate = useNavigate();
 
-	const isLoggedIn = !!store.user || store.is_admin;
-	const userEmail = store.user?.email || (store.is_admin ? "Admin" : "Invitado");
-	return (
-		<>
-			<nav className="navbar navbar-expand navbar-light bg-ligth border border-dark">
-				<div className="container">
-					<Link to="/">
-						<img src={logoAnimal} className="img-fluid rounded-circle" style={{ width: 40 }} alt="imagen" />
-					</Link>
-					<div className="collapse navbar-collapse" id="navbarNavAltMarkup">
-						<div className="navbar-nav mx-2">
-							<Link className="no-link" to="/">
-								<span className="nav-link active mx-4 p-2 fs-5 fw-semibold link-pretty" aria-current="page" href="#">Home</span>
-							</Link>
-							<Link className="no-link" to="/adoption">
-								<span className="nav-link active p-2 fs-5 fw-semibold link-pretty" aria-current="page" href="#">Quiero adoptar <LuPawPrint /></span>
-							</Link>
-							<Link className="no-link" to="/sponsorship">
-								<span className="nav-link active p-2 fs-5 fw-semibold link-pretty" aria-current="page" href="#" >Quiero apadrinar <LuPawPrint /></span>
-							</Link>
-							{store.is_admin === true && (
-								<>
-									<Link className="no-link" to="/Admin">
-										<span className="nav-link active p-2 fs-5 fw-semibold link-pretty" aria-current="page" href="#">Gestionar Gatos <LuPawPrint /></span>
-									</Link>
-									<Link className="no-link" to="/admin-list-sponsor">
-										<span className="nav-link active p-2 fs-5 fw-semibold link-pretty" aria-current="page" href="#"> Listado de sponsor <LuPawPrint /></span>
-									</Link>
-								</>
-							)}
-						</div>
-					</div>
-					<div className="ml-auto nav-item dropdown">
-						<button
-							className="dropdown-toggle btn btn-info"
-							role="button"
-							data-bs-toggle="dropdown"
-							aria-expanded="false"
-		
-						>
-							{isLoggedIn ? userEmail : "Ingresar"}
-						</button>
+  const [darkMode, setDarkMode] = useState(false);
 
-						<ul className="dropdown-menu">
-							{isLoggedIn ? (
-								<li>
-									<Link className="no-link" to="/user-data">
-									<span className="dropdown-item">{userEmail}</span>
-									</Link>
-								</li>
-							) : (
-								<li>
-									<Link className="no-link" to="/login">
-										<button className="dropdown-item">Iniciar sesión</button>
-									</Link>
-								</li>
-							)}
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("is_admin");
+    dispatch({ type: "Logout" });
+    navigate("/");
+  };
 
-							<li><hr className="dropdown-divider" /></li>
+  const isLoggedIn = !!store.user || store.is_admin;
 
-							{isLoggedIn ? (
-								<li>
-									<button className="btn btn-danger dropdown-item" onClick={handleLogout}>
-										Logout
-									</button>
-								</li>
-							) : (
-								<li>
-									<Link className="no-link" to="/form">
-										<button className="dropdown-item">Registrarme</button>
-									</Link>
-								</li>
-							)}
-						</ul>
-					</div>
-				</div>
-			</nav>
-		</>
-	);
+  let userDisplayName = "Invitado";
+  if (store.is_admin) {
+    userDisplayName = "Admin";
+  } else if (store.user) {
+    userDisplayName = "Área Personal";
+  }
+
+  return (
+    <nav className={`navbar navbar-expand-lg navbar-custom sticky-top ${darkMode ? "dark-mode" : ""}`}>
+      <div className="container">
+        <Link className="navbar-brand d-flex align-items-center" to="/">
+          <img src={logo} alt="Logo" className="logo" />
+        </Link>
+
+        <button
+          className="navbar-toggler border-0"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+
+        <div className="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
+          <ul className="navbar-nav mb-2 mb-lg-0 gap-lg-4 mx-auto">
+            <li className="nav-item">
+              <Link className="nav-link nav-link-custom" to="/">Home</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link nav-link-custom d-flex align-items-center gap-1" to="/adoption">
+                Quiero adoptar <LuPawPrint />
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link nav-link-custom d-flex align-items-center gap-1" to="/sponsorship">
+                Quiero apadrinar <LuPawPrint />
+              </Link>
+            </li>
+            {store.is_admin && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link nav-link-custom d-flex align-items-center gap-1" to="/Admin">
+                    Gestionar Gatos <LuPawPrint />
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link nav-link-custom d-flex align-items-center gap-1" to="/admin-list-sponsor">
+                    Listado Sponsors <LuPawPrint />
+                  </Link>
+                </li>
+              </>
+            )}
+          </ul>
+
+          <div className="d-flex align-items-center gap-3">
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="btn btn-toggle-mode"
+              aria-label="Toggle dark mode"
+              title={darkMode ? "Modo claro" : "Modo oscuro"}
+            >
+              {darkMode ? <LuSun size={20} /> : <LuMoon size={20} />}
+            </button>
+
+            <div className="dropdown">
+              <button
+                className="btn btn-user dropdown-toggle d-flex align-items-center gap-2"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {isLoggedIn ? <LuUser size={20} /> : <LuUserPlus size={20} />}
+                <span className="user-email">{userDisplayName}</span>
+              </button>
+              <ul className={`dropdown-menu dropdown-menu-end dropdown-menu-custom`}>
+                {isLoggedIn ? (
+                  <>
+                    <li>
+                      <Link className="dropdown-item" to="/user-data">Mi Perfil</Link>
+                    </li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <button
+                        className="dropdown-item text-danger d-flex align-items-center gap-2"
+                        onClick={handleLogout}
+                      >
+                        <LuLogOut size={18} /> Cerrar sesión
+                      </button>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li><Link className="dropdown-item" to="/login">Iniciar sesión</Link></li>
+                    <li><Link className="dropdown-item" to="/form">Registrarme</Link></li>
+                  </>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
 };

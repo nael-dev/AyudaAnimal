@@ -18,31 +18,31 @@ export const Home = () => {
 
 	const { store, dispatch } = useGlobalReducer()
 	useEffect(() => {
-	const token = localStorage.getItem("token");
-	if (!token || store.user) return;
+		const token = localStorage.getItem("token");
+		if (!token || store.user) return;
 
-	const fetchUser = async () => {
-		try {
-			const backendUrl = import.meta.env.VITE_BACKEND_URL;
-			const res = await fetch(`${backendUrl}/api/user/user-data`, {
-				headers: {
-					"Authorization": `Bearer ${token}`
-				}
-			});
-			if (!res.ok) throw new Error("No se pudo recuperar el usuario");
+		const fetchUser = async () => {
+			try {
+				const backendUrl = import.meta.env.VITE_BACKEND_URL;
+				const res = await fetch(`${backendUrl}/api/user/user-data`, {
+					headers: {
+						"Authorization": `Bearer ${token}`
+					}
+				});
+				if (!res.ok) throw new Error("No se pudo recuperar el usuario");
 
-			const data = await res.json();
-			dispatch({ type: "set_user", payload: { user: data.user, token } });
-			localStorage.setItem("user", JSON.stringify(data.user));
-		} catch (err) {
-			console.error("Error al recuperar el usuario:", err);
-			localStorage.removeItem("token");
-			localStorage.removeItem("user");
-		}
-	};
+				const data = await res.json();
+				dispatch({ type: "set_user", payload: { user: data.user, token } });
+				localStorage.setItem("user", JSON.stringify(data.user));
+			} catch (err) {
+				console.error("Error al recuperar el usuario:", err);
+				localStorage.removeItem("token");
+				localStorage.removeItem("user");
+			}
+		};
 
-	fetchUser();
-}, []);
+		fetchUser();
+	}, []);
 
 	useEffect(() => {
 
@@ -114,27 +114,30 @@ export const Home = () => {
 
 
 	return (
-		<div className="text-center p-5" style={{backgroundImage: `url(${fotobackground})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+		<div className="text-center p-5" style={{ backgroundImage: `url(${fotobackground})`, backgroundSize: "cover", backgroundPosition: "center" }}>
 			<Jumbotron />
 			<hr className="my-4 border-3 border-dark opacity-50" />
 			<h1>Conoce nuestros gatitos!<GiPawHeart /></h1>
-			<Carousel cards={cat.map((cat) => (
-			<Card cat={cat} key={cat.id} />	
-			)
-			)}
-			/>
-			<hr className="my-4 border-3 border-dark opacity-50" />
-			<h1>Tips para cuidar de tu minino <MdOutlineTipsAndUpdates /></h1>
-			<Carousel cards={tips.map((tip, index) => (
-				<div key={tip.title} className="card text-bg-info m-3" style={{ width: 250, height: 250 }}>
-					<div className="card-header">{`Tip #${index}`}</div>
-					<div className="card-body">
-						<h5 className="card-title">{tip.title}</h5>
-						<p className="card-text">{tip.content}</p>
+			<Carousel
+				cards={tips.map((tip) => (
+					<div
+						key={tip.title}
+						className="card shadow-sm rounded-4 border border-info-subtle overflow-hidden m-3"
+						style={{ width: "14rem", transition: "transform 0.3s ease", cursor: "default" }}
+					>
+						<div
+							className="bg-light p-3 d-flex justify-content-center align-items-center"
+							style={{ height: 120 }}
+						>
+							<MdOutlineTipsAndUpdates size={48} className="text-info" />
+						</div>
+						<div className="card-body text-center d-flex flex-column">
+							<h5 className="card-title fw-semibold text-primary-emphasis">{tip.title}</h5>
+							<p className="card-text text-secondary mt-auto">{tip.content}</p>
+						</div>
 					</div>
-				</div>
-
-			))} />
+				))}
+			/>
 			<hr className="my-4 border-3 border-dark opacity-50" />
 			<ListFoodCat />
 		</div>
