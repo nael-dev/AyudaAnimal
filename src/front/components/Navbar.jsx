@@ -99,7 +99,7 @@ export const Navbar = () => {
                 {isLoggedIn ? (
                   <>
                     <li>
-                      <Link className="dropdown-item" to="/user-data">Mi Perfil</Link>
+                      <Link className="dropdown-item" to="/user-data">Mis Donaciones</Link>
                     </li>
                     <li><hr className="dropdown-divider" /></li>
                     <li>

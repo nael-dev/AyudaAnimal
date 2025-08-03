@@ -143,7 +143,7 @@ export const Login = () => {
                     <div className="d-grid text-center">
                     <button
                         type="submit"
-                        className="btn btn-canela"   
+                        className="btn btn-primary-custom mt-auto w-100"   
                     >
                     Login
                     </button>

@@ -69,27 +69,53 @@ export const CheckoutForm = ({ amount, setAmount, currency, setCurrency, onPayme
 
     }
     return (
-        <form className="w-75 bg-light mx-auto" onSubmit={handleSubmit}>
-            <div className="mx-auto my-2 col-6">
-                <label>Amount</label>
+        <form
+            className="w-75 mx-auto p-4 rounded-4 shadow-lg"
+            style={{ backgroundColor: "#f0f6ff" }}
+            onSubmit={handleSubmit}
+        >
+            <div className="mb-4 mx-auto col-6">
+                <label
+                    htmlFor="amount"
+                    className="form-label fw-semibold"
+                    style={{ color: "#0d6efd" }}
+                >
+                    Amount
+                </label>
                 <input
+                    id="amount"
                     type="text"
                     pattern="[0-9]*"
                     inputMode="numeric"
                     value={amount}
-                    onChange={(e) => setAmount((e.target.value))}
-                ></input>
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="form-control rounded-pill border-2 border-primary"
+                    style={{
+                        backgroundColor: "#fff",
+                        color: "#0d6efd",
+                        fontWeight: "600",
+                    }}
+                />
             </div>
-            <div className="mx-auto  my-2 col-6">
-                <label>Moneda</label>
+
+            <div className="mb-4 mx-auto col-6">
+                <label
+                    htmlFor="currency"
+                    className="form-label fw-semibold"
+                    style={{ color: "#0d6efd" }}
+                >
+                    Moneda
+                </label>
                 <select
+                    id="currency"
                     value={currency}
                     onChange={(e) => {
                         const selectedCurrency = e.target.value;
                         setCurrency(selectedCurrency);
                         dispatch({ type: "divisa", payload: { currency: selectedCurrency } });
                     }}
-                    className="form-control"
+                    className="form-select rounded-pill border-2 border-primary"
+                    style={{ backgroundColor: "#fff", color: "#0d6efd", fontWeight: "600" }}
                 >
                     <option value="usd">USD</option>
                     <option value="eur">EUR</option>
@@ -98,24 +124,54 @@ export const CheckoutForm = ({ amount, setAmount, currency, setCurrency, onPayme
             </div>
 
             <div className="my-5">
-                <CardElement />
+                <CardElement
+                    options={{
+                        style: {
+                            base: {
+                                fontSize: "16px",
+                                color: "#0d6efd",
+                                fontWeight: "600",
+                                "::placeholder": {
+                                    color: "#a0b9ff",
+                                },
+                            },
+                            invalid: {
+                                color: "#ff4d4f",
+                            },
+                        },
+                    }}
+                />
             </div>
-            <div className='d-flex justify-content-center'>
-            <button
-                type="submit"
-                className="btn btn-info col-3 mx-auto"
-                disabled={!stripe || loading}>
 
-                Pay
-            </button>
+            <div className="d-flex justify-content-center">
+                <button
+                    type="submit"
+                    className="btn btn-primary rounded-pill px-5 py-2 shadow"
+                    disabled={!stripe || loading}
+                    style={{
+                        backgroundColor: "#0d6efd",
+                        border: "none",
+                        fontWeight: "700",
+                        fontSize: "1.1rem",
+                        transition: "background-color 0.3s ease",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#0048d0")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0d6efd")}
+                >
+                    Pay
+                </button>
             </div>
+
             {paymentSuccess && (
-                <div className="alert alert-success mt-3" role="alert">
+                <div
+                    className="alert alert-success mt-4 rounded-3 text-center"
+                    role="alert"
+                    style={{ fontWeight: "600", color: "#0048d0", backgroundColor: "#d0e3ff" }}
+                >
                     Su pago ha sido procesado. Redireccionando...
                 </div>
             )}
-
-
         </form>
     );
+
 };

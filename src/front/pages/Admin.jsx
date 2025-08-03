@@ -96,7 +96,7 @@ export const Admin = () => {
 
                     <div className="d-grid">
                         
-                        <button type="submit" className="btn btn-canela">
+                        <button type="submit" className="btn btn-btn btn-primary-custom mt-auto w-100">
                             Registar Gato
                         </button>
                     </div>

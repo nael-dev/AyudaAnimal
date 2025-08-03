@@ -25,31 +25,29 @@ CORS(api)
 def create_user():
     body = request.get_json()
 
-    required_fields = ['email', 'password', 'name', 'lastname', 'birthdate']
+    required_fields = ['email', 'password']
     if not all(field in body for field in required_fields):
-        return jsonify({'err': 'Bad request, missing fields'}), 400
+        return jsonify({'err': 'Bad request, missing email or password'}), 400
 
     search_exist = select(User).where(User.email == body['email'])
-    alredy_exist = db.session.execute(search_exist).scalar_one_or_none()
+    already_exist = db.session.execute(search_exist).scalar_one_or_none()
 
-    if (alredy_exist):
-        return jsonify({"error": "User already exist"}), 401
+    if already_exist:
+        return jsonify({"error": "User already exists"}), 409
 
     try:
         hashed_password = ph.hash(body['password'])
-    except Exception as e:
+    except Exception:
         return jsonify({'error': 'Failed to hash password'}), 500
 
-    user = User()
-    user.email = body['email']
-    user.password = hashed_password
-    user.name = body['name']
-    user.lastname = body['lastname']
-    user.birthdate = body['birthdate']
+    user = User(
+        email=body['email'],
+        password=hashed_password
+    )
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({'Ok': "User created"}), 200
+    return jsonify({'Ok': "User created"}), 201
 
 
 @api.route('/login', methods=['POST'])
