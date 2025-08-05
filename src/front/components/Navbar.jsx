@@ -30,9 +30,8 @@ export const Navbar = () => {
     <nav className={`navbar navbar-expand-lg navbar-custom sticky-top ${darkMode ? "dark-mode" : ""}`}>
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center" to="/">
-          <img src={logo} alt="Logo" className="logo" />
+          <img src={logo} alt="Logo" className="logo spin-icon" />
         </Link>
-
         <button
           className="navbar-toggler border-0"
           type="button"

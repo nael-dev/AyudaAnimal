@@ -1,3 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
+
+
 .link-footer {
   color: black !important; /* color negro */
   font-weight: 500;
@@ -66,7 +70,7 @@
 
 
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
 
 body {
   font-family: 'Roboto', sans-serif;
@@ -194,7 +198,7 @@ body {
   }
 }
 
-/* DARK MODE styles ONLY inside navbar */
+/* DARK MODE  */
 .navbar-custom.dark-mode {
   background-color: rgba(18, 18, 18, 0.85);
   box-shadow: 0 2px 20px rgb(0 0 0 / 0.6);
@@ -255,7 +259,8 @@ body {
 }
 
 .btn-primary-custom:hover {
-  background-color: #0b5ed7;
+  background-color: #0b5ed7; /* azul oscuro */
+  color: #000; /* letras negras */
   box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
 }
 
@@ -315,4 +320,116 @@ body {
 
 .image-zoom-container:hover img {
   transform: scale(1.1);
+}
+
+
+/* login */
+
+.login-page {
+  min-height: 80vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-container {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-clip: padding-box;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-header h2 {
+  font-weight: bold;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.input-box {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.input-box input {
+  width: 100%;
+  padding: 10px 10px 10px 2.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  outline-color: #3b82f6;
+}
+
+.input-box i {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #999;
+}
+
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #3b82f6;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-login:hover {
+  background-color: #2563eb;
+}
+
+.register-link {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.login-error {
+  background-color: #f8d7da;
+  padding: 10px;
+  margin-bottom: 1rem;
+  color: #842029;
+  border-radius: 6px;
+  text-align: center;
+}
+
+
+/*Girar logo navbar */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-icon {
+  animation: spin 2s linear infinite;
 }

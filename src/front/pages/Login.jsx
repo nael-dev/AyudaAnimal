@@ -1,158 +1,125 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
-import fotobackground from '../assets/img/fotobackground.jpeg';
-import {Link} from "react-router-dom"
-
+import fotobackground from '../assets/img/fondo-login.webp';
+import '../index.css';
 
 export const Login = () => {
-    const navigate = useNavigate()
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
-    const { store, dispatch } = useGlobalReducer();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { dispatch } = useGlobalReducer();
 
-    const handleLogin = async (email, password) => {
-        try {
-            const backendUrl = import.meta.env.VITE_BACKEND_URL
+  const logoRef = useRef(null);
+  const angleRef = useRef(0);
 
-            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file")
+  useEffect(() => {
+    let animationFrameId;
 
-            const response = await fetch(`${backendUrl}/api/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email,
-                    password
-                })
+    const rotateLogo = () => {
+      angleRef.current = (angleRef.current + 2) % 360;
+      if (logoRef.current) {
+        logoRef.current.style.transform = `rotate(${angleRef.current}deg)`;
+      }
+      animationFrameId = requestAnimationFrame(rotateLogo);
+    };
 
-            })
-            const data = await response.json()
+    rotateLogo();
 
-            if (!data.token)
-                return undefined;
+    return () => cancelAnimationFrame(animationFrameId);
+  }, []);
 
-            localStorage.setItem('token', data.token)
-            localStorage.setItem('is_admin', JSON.stringify(data.is_admin))
-            dispatch({ type: "set_token", payload: data.token });
-            dispatch({ type: "admin", payload: { is_admin: data.is_admin } });
-            return data;
+  const handleLogin = async (email, password) => {
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined");
 
+      const response = await fetch(`${backendUrl}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
 
+      const data = await response.json();
+      if (!data.token) return undefined;
 
-
-        } catch (err) {
-            setError(err.error)
-            throw new Error("Error en login")
-        }
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('is_admin', JSON.stringify(data.is_admin));
+      dispatch({ type: "set_token", payload: data.token });
+      dispatch({ type: "admin", payload: { is_admin: data.is_admin } });
+      return data;
+    } catch (err) {
+      setError("Error en login");
+      return;
     }
+  };
 
-    const handleOnSubmit = async (evt) => {
-        evt.preventDefault();
-        const response = await handleLogin(email, password);
-
-        if (!response) {
-            setError('Error en el login')
-            return;
-        }
-
-        dispatch({
-            type: 'admin',
-            payload: {
-                is_admin: response.is_admin
-            }
-        })
-
-        if (response) {
-            if (response.is_admin === true) {
-                navigate('/');
-            } else {
-                navigate('/user-data');
-            }
-        }
+  const handleOnSubmit = async (evt) => {
+    evt.preventDefault();
+    const response = await handleLogin(email, password);
+    if (!response) {
+      setError('Usuario o contraseña incorrecta');
+      return;
     }
+    if (response.is_admin) {
+      navigate('/');
+    } else {
+      navigate('/user-data');
+    }
+  };
 
 
-    return (
-        <div className="p-5" style={{ backgroundImage:`url(${fotobackground})`, backgroundSize:"cover", backgroundPosition: "center" }}>
-                    <div className="container" style={{ maxWidth: "500px" }}>
-        <section
-            className="container d-flex flex-column justify-content-center align-items-center"
-            style={{
-                minHeight: '60vh',
-                fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-                color: '#1e1e1e',
-            }}
-        >
-            {error ? (
-                <div className="alert alert-danger">{error}</div>
-            ) : null}
-
-            <h1 style={{ fontWeight: 'bold', fontSize: '2.5rem', marginBottom: '1rem' }}>
-                Login
-            </h1>
-
-            <form
-                className="d-flex justify-content-center my-2"
-                onSubmit={handleOnSubmit}
-            >
-                <fieldset
-                    className="d-flex flex-column p-4 rounded"
-                    style={{
-                        backgroundColor: 'rgb(255, 255, 255)',
-                        border: '1px solid #ccc',
-                        borderRadius: '12px',
-                        width: '300px',
-                    }}
-                >
-                    <label style={{ fontWeight: '500', marginBottom: '4px' }}>Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={email}
-                        placeholder="email"
-                        required
-                        onChange={(evt) => setEmail(evt.target.value)}
-                        style={{
-                            padding: '8px',
-                            borderRadius: '6px',
-                            border: '1px solid #ccc',
-                            marginBottom: '1rem',
-                            outlineColor: '#3b82f6',
-                        }}
-                    />
-
-                    <label style={{ fontWeight: '500', marginBottom: '4px' }}>Password</label>
-                    <input
-                        type="password"
-                        name="password"
-                        value={password}
-                        placeholder="Password"
-                        required
-                        onChange={(evt) => setPassword(evt.target.value)}
-                        style={{
-                            padding: '8px',
-                            borderRadius: '6px',
-                            border: '1px solid #ccc',
-                            marginBottom: '1rem',
-                            outlineColor: '#3b82f6',
-                        }}
-                    />
-                    <div className="d-grid text-center">
-                    <button
-                        type="submit"
-                        className="btn btn-primary-custom mt-auto w-100"   
-                    >
-                    Login
-                    </button>
-                    <span className="mt-2">No tienes cuenta? <Link to="/form">Registrate</Link></span>
-                    </div>
-                </fieldset>
-            </form>
-        </section>
+  return (
+    <div
+      className="login-page"
+      style={{ backgroundImage: `url(${fotobackground})` }}
+    >
+      <div className="login-container">
+        <div className="login-header">
+          <h2>Login</h2>
+          <i ref={logoRef} className="fa-solid fa-paw fa-2x"></i>
         </div>
-</div>
-    )
-}
+
+        {error && <div className="login-error">{error}</div>}
+
+        <form onSubmit={handleOnSubmit}>
+          <div className="input-box">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              required
+            />
+            <i className="fa-solid fa-user"></i>
+          </div>
+
+          <div className="input-box">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+            />
+            <i className="fa-solid fa-lock"></i>
+          </div>
+
+          <div className="remember-forgot">
+            <label>
+              <input type="checkbox" /> Remember me
+            </label>
+            <a href="#">Forgot password?</a>
+          </div>
+
+          <button type="submit" className="btn-login">Login</button>
+
+          <div className="register-link">
+            <p>No tienes cuenta? <Link to="/form">Regístrate</Link></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
