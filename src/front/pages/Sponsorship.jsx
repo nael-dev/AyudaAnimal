@@ -36,19 +36,22 @@ export const Sponsorship = () => {
         handleGetCat();
     }, [])
     return (
-        <div className="p-4" style={{ backgroundImage:`url(${fotobackground})`, backgroundSize:"cover", backgroundPosition: "center", height: 680 }}>
+        <div className="p-4" style={{ backgroundImage: `url(${fotobackground})`, backgroundSize: "cover", backgroundPosition: "center", minHeight: "680px" }}>
+
             <div className="content ">
                 <h1 className="text-center p-2">Quieres apadrinar?</h1>
                 <div className="text-center p-2" >
                     <div className="card border-info mb-3 m-auto" style={{ width: 800 }}>
                         <div className="card-body">
-                            <h5 className="card-title">Si estás interesado en apadrinar, pulsa en el botón de "Quiero saber más" <br></br>
-                            Allí encontrarás la información detallada de cada gato.   </h5>
+                            <h5 className="card-title">Apadrinar un gato es una forma hermosa y comprometida de ayudar sin necesidad de adoptar directamente. Cuando apadrinas, estás brindando un apoyo vital que permite cubrir sus necesidades básicas como alimentación, atención veterinaria, vacunas y un refugio seguro.  </h5>
+                            <h5 className="card-title">Gracias a tu donación, los gatitos rescatados reciben cuidados constantes que mejoran su calidad de vida y les dan la oportunidad de crecer sanos y felices mientras esperan un hogar definitivo.
+
+                            </h5>
                         </div>
                     </div>
                 </div>
                 <div className="p-5">
-                    <Carousel  cards={cat.map((cat) => (
+                    <Carousel cards={cat.map((cat) => (
                         <Card cat={cat} key={cat.id} />
                     )
                     )}

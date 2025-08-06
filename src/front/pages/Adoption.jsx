@@ -39,7 +39,8 @@ export const Adoption = () => {
         handleGetCat();
     }, [])
     return (
-        <div className="p-4" style={{ backgroundImage:`url(${fotobackground})`, backgroundSize:"cover", backgroundPosition: "center", height: 680 }}>
+      <div className="p-4" style={{ backgroundImage: `url(${fotobackground})`, backgroundSize: "cover", backgroundPosition: "center", minHeight: "800px" }}>
+
         <div className="content">
             <h1 className="text-center p-2">Quieres adoptar?</h1>
             <div className="text-center p-2" >
