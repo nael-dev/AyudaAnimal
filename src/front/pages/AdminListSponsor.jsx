@@ -65,7 +65,7 @@ export const AdminListSponsor = () => {
                 <div
                     className="card shadow-sm bg-white bg-opacity-75 rounded-4"
                     style={{
-                        maxHeight: "800px",
+                        height: "800px",
                         overflowY: "auto",
                         padding: "1rem",
                         border: "1px solid #0d6efd",
@@ -97,7 +97,9 @@ export const AdminListSponsor = () => {
                                 </p>
                                 <p className="card-text">
                                     <strong>Fecha de Registro:</strong>{" "}
-                                    {new Date(item.date_payment).toLocaleString("es-ES", {
+                                    {new Date(
+                                        new Date(item.date_payment).getTime() + 2 * 60 * 60 * 1000 // ⬅️ Ajuste de +2h
+                                    ).toLocaleString("es-ES", {
                                         day: "numeric",
                                         month: "long",
                                         year: "numeric",
