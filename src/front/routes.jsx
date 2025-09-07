@@ -19,6 +19,7 @@ import { Adoption } from "./pages/Adoption"
 import { DetailCat } from "./pages/DetailCat"
 import { Admin } from "./pages/Admin";
 import { AdminListSponsor } from "./pages/AdminListSponsor";
+import { Acogida } from "./pages/Acogida";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -43,6 +44,7 @@ export const router = createBrowserRouter(
       <Route path="/detail-cat-page/:cat_id" element={<DetailCat />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/admin-list-sponsor" element={<AdminListSponsor />} />
+      <Route path= "/acogida" element ={<Acogida />} />
 
       {/* Private Routes: These routes are protected and require authentication. */}
       <Route path="/detail-cat-page/:id" element={<DetailCat />} />
