@@ -11,6 +11,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import stripe
 import os
+import stmplib
 
 
 ph = PasswordHasher()
@@ -333,3 +334,60 @@ def create_checkout_session():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+
+@api.route("/send-email", methods=["POST"])
+def send_email():
+    data = request.get_json()
+    # Aquí puedes recibir todos los campos de tu formulario
+    name = data.get("name")
+    email = data.get("email")
+    age = data.get("age")
+    phone = data.get("phone")
+    city = data.get("city")
+    dwelling = data.get("dwelling")
+    access = data.get("access")
+    company = data.get("company")
+    child = data.get("child")
+    otherAnimals = data.get("otherAnimals")
+    aloneInHome = data.get("aloneInHome")
+    welcomeTime = data.get("welcomeTime")
+    babyAnimal = data.get("babyAnimal")
+    why = data.get("why")
+
+    try:
+        smtp_server = "smtp.gmail.com"
+        smtp_port = 587
+        sender_email = os.getenv("EMAIL_USER")
+        sender_password = os.getenv("EMAIL_PASS")
+
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+
+        subject = f"Nuevo formulario de {name}"
+        body = f"""
+        Nombre: {name}
+        Edad: {age}
+        Teléfono: {phone}
+        Email: {email}
+        Ciudad: {city}
+        Vivienda: {dwelling}
+        Acceso: {access}
+        Compañía: {company}
+        Niños: {child}
+        Otros animales: {otherAnimals}
+        Solo en casa: {aloneInHome}
+        Hora de bienvenida: {welcomeTime}
+        Animales bebé: {babyAnimal}
+        Motivo: {why}
+        """
+        full_email = f"Subject: {subject}\n\n{body}"
+
+        server.sendmail(sender_email, sender_email, full_email)
+        server.quit()
+
+        return jsonify({"success": True, "message": "Correo enviado"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
