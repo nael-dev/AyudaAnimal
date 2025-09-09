@@ -11,7 +11,9 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 import stripe
 import os
-import stmplib
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 ph = PasswordHasher()
@@ -19,7 +21,8 @@ ph = PasswordHasher()
 api = Blueprint('api', __name__)
 
 
-CORS(api)
+CORS(api, resources={r"/*": {"origins": "https://super-duper-capybara-q74x9x54gxg924jjp-3000.app.github.dev"}})
+
 
 
 @api.route('/signup', methods=['POST'])
@@ -339,7 +342,8 @@ def create_checkout_session():
 @api.route("/send-email", methods=["POST"])
 def send_email():
     data = request.get_json()
-    # Aquí puedes recibir todos los campos de tu formulario
+
+    # Recibir todos los campos del formulario
     name = data.get("name")
     email = data.get("email")
     age = data.get("age")
@@ -351,21 +355,21 @@ def send_email():
     child = data.get("child")
     otherAnimals = data.get("otherAnimals")
     aloneInHome = data.get("aloneInHome")
-    welcomeTime = data.get("welcomeTime")
-    babyAnimal = data.get("babyAnimal")
     why = data.get("why")
 
     try:
+        # Configuración SMTP
         smtp_server = "smtp.gmail.com"
         smtp_port = 587
         sender_email = os.getenv("EMAIL_USER")
         sender_password = os.getenv("EMAIL_PASS")
 
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(sender_email, sender_password)
+        # Crear el mensaje
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = sender_email
+        msg['Subject'] = f"Nuevo formulario de {name}"
 
-        subject = f"Nuevo formulario de {name}"
         body = f"""
         Nombre: {name}
         Edad: {age}
@@ -378,13 +382,15 @@ def send_email():
         Niños: {child}
         Otros animales: {otherAnimals}
         Solo en casa: {aloneInHome}
-        Hora de bienvenida: {welcomeTime}
-        Animales bebé: {babyAnimal}
         Motivo: {why}
         """
-        full_email = f"Subject: {subject}\n\n{body}"
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
-        server.sendmail(sender_email, sender_email, full_email)
+        # Enviar correo
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, sender_email, msg.as_string())
         server.quit()
 
         return jsonify({"success": True, "message": "Correo enviado"}), 200
