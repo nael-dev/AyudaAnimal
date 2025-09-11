@@ -59,6 +59,12 @@ export const Navbar = () => {
                 Quiero apadrinar <LuPawPrint />
               </Link>
             </li>
+             <li className="nav-item">
+              <Link className="nav-link nav-link-custom d-flex align-items-center gap-1" to="/acogida">
+                Quiero ser casa de acogida <LuPawPrint />
+              </Link>
+            </li>
+
             {store.is_admin && (
               <>
                 <li className="nav-item">

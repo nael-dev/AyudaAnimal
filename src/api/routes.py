@@ -368,7 +368,7 @@ def send_email():
         msg = MIMEMultipart()
         msg['From'] = sender_email
         msg['To'] = sender_email
-        msg['Subject'] = f"Nuevo formulario de {name}"
+        msg['Subject'] = f"Nuevo formulario de  acogida de {name}"
 
         body = f"""
         Nombre: {name}
