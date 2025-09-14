@@ -128,41 +128,42 @@ export const Acogida = () => {
                             <select className="my-2" name="city" onChange={handleChange} required>
                                 <option value="">-- Vivo en.. --</option>
                                 <option value="Cadiz">Cádiz</option>
-                                <option value="Je">Jerez</option>
-                                <option value="sf">San Fernando</option>
-                                <option value="ch">Chiclana</option>
+                                <option value="Jerez">Jerez</option>
+                                <option value="San Fernando">San Fernando</option>
+                                <option value="Chiclana">Chiclana</option>
+                                <option value ="El puerto">El puerto </option>
                             </select>
 
                             <select className="my-2" name="dwelling" onChange={handleChange} required>
                                 <option value="">-- Mi casa es.. --</option>
-                                <option value="pi">Piso</option>
-                                <option value="ccp">Casa con patio o terraza </option>
-                                <option value="csp">Casa sin patio o terraza</option>
-                                <option value="cc"> Casa de campo</option>
+                                <option value="Piso">Piso</option>
+                                <option value="casa con patio o terraza">Casa con patio o terraza </option>
+                                <option value="casa sin patio o terraza">Casa sin patio o terraza</option>
+                                <option value="casa de campo"> Casa de campo</option>
                             </select>
                             <select className="my-2" name="access" onChange={handleChange} required>
                                 <option value="">--Acceso a la casa --</option>
-                                <option value="all">Acceso a toda la casa</option>
-                                <option value="part">Acceso a una parte de la casa o habitaciones solamente </option>
-                                <option value="only">Estará en el patio o la terraza</option>
+                                <option value="Acceso a toda la casa">Acceso a toda la casa</option>
+                                <option value="Acceso a una parte de la casa o habitaciones solamente">Acceso a una parte de la casa o habitaciones solamente </option>
+                                <option value="Estará en el patio o la terraza">Estará en el patio o la terraza</option>
                             </select>
                             <select className="my-2" name="company" onChange={handleChange} required>
                                 <option value="">--Habitantes de casa --</option>
-                                <option value="all">Vivo con mi pareja o familia  </option>
-                                <option value="part">Vivo con mi paraje o familia y mis hijos gatunos/perrunos </option>
-                                <option value="only">Vivo solo</option>
-                                <option value="owa">Vivo solo y mis gatos o perros</option>
+                                <option value="Vivo con mi pareja o familia">Vivo con mi pareja o familia  </option>
+                                <option value="Vivo con mi paraje o familia y mis hijos gatunos/perrunos ">Vivo con mi paraje o familia y mis hijos gatunos/perrunos </option>
+                                <option value="Vivo solo">Vivo solo</option>
+                                <option value="Vivo solo y mis gatos o perros">Vivo solo y mis gatos o perros</option>
                             </select>
                             <select className="my-2" name="child" onChange={handleChange} required>
                                 <option value="">--Hijos --</option>
-                                <option value="yes">Tengo hijos  </option>
+                                <option value="si">Tengo hijos  </option>
                                 <option value="no">No tengo hijos </option>
                             </select>
                             <select className="my-2" name="protection" onChange={handleChange} required>
                                 <option value="">--¿Tienes protegidas las ventanas/puertas/salidas --</option>
-                                <option value="yes">Sí, lo tengo todo protegido </option>
-                                <option value="nby">No, pero puedo ponerlo</option>
-                                <option value="no">No, y no quiero ponerlo</option>
+                                <option value="SI">Sí, lo tengo todo protegido </option>
+                                <option value="No, pero puedo ponerlas">No, pero puedo ponerlo</option>
+                                <option value="No">No, y no quiero ponerlo</option>
                             </select>
                             <textarea
                                 name="otherAnimals"
