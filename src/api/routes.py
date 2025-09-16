@@ -21,8 +21,8 @@ ph = PasswordHasher()
 api = Blueprint('api', __name__)
 
 
-CORS(api, resources={r"/*": {"origins": "https://super-duper-capybara-q74x9x54gxg924jjp-3000.app.github.dev"}})
-
+CORS(api, resources={
+     r"/*": {"origins": "https://super-duper-capybara-q74x9x54gxg924jjp-3000.app.github.dev"}})
 
 
 @api.route('/signup', methods=['POST'])
@@ -321,69 +321,89 @@ def handle_delete_user(user_id):
 stripe.api_key = 'sk_test_51RahuCFMs8PtSpw5R8ZDgpeE3cGPxARTavpjBSoP2YJJGvyYEUOEHF9J0QgrbVQHyTv9K86mZETEuKJHZODPQOuT00mb5wz0An'
 
 
-@api.route('/create-checkout-session', methods=['POST'])
-def create_checkout_session():
-    try:
-        data = request.json
-        intent = stripe.PaymentIntent.create(
-            amount=data['amount'],
-            currency=data['currency'],
-            automatic_payment_methods={'enabled': True
-                                       }
-        )
-        return jsonify({
-            'clientSecret': intent['client_secret']
-        })
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-
 @api.route("/send-email", methods=["POST"])
 def send_email():
     data = request.get_json()
+    form_type = data.get("formType")
 
-    # Recibir todos los campos del formulario
-    name = data.get("name")
-    email = data.get("email")
-    age = data.get("age")
-    phone = data.get("phone")
-    city = data.get("city")
-    dwelling = data.get("dwelling")
-    access = data.get("access")
-    company = data.get("company")
-    child = data.get("child")
-    otherAnimals = data.get("otherAnimals")
-    aloneInHome = data.get("aloneInHome")
-    why = data.get("why")
+    # Configuración SMTP
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    sender_email = os.getenv("EMAIL_USER")
+    sender_password = os.getenv("EMAIL_PASS")
 
     try:
-        # Configuración SMTP
-        smtp_server = "smtp.gmail.com"
-        smtp_port = 587
-        sender_email = os.getenv("EMAIL_USER")
-        sender_password = os.getenv("EMAIL_PASS")
-
-        # Crear el mensaje
         msg = MIMEMultipart()
         msg['From'] = sender_email
         msg['To'] = sender_email
-        msg['Subject'] = f"Nuevo formulario de  acogida de {name}"
 
-        body = f"""
-        Nombre: {name}
-        Edad: {age}
-        Teléfono: {phone}
-        Email: {email}
-        Ciudad: {city}
-        Vivienda: {dwelling}
-        Acceso: {access}
-        Compañía: {company}
-        Niños: {child}
-        Otros animales: {otherAnimals}
-        Solo en casa: {aloneInHome}
-        Motivo: {why}
-        """
+    
+        if form_type == "acogida":
+            name = data.get("name")
+            email = data.get("email")
+            age = data.get("age")
+            phone = data.get("phone")
+            city = data.get("city")
+            dwelling = data.get("dwelling")
+            access = data.get("access")
+            company = data.get("company")
+            child = data.get("child")
+            otherAnimals = data.get("otherAnimals")
+            aloneInHome = data.get("aloneInHome")
+            why = data.get("why")
+
+            msg['Subject'] = f"Nuevo formulario de acogida de {name}"
+            body = f"""
+            Nombre: {name}
+            Edad: {age}
+            Teléfono: {phone}
+            Email: {email}
+            Ciudad: {city}
+            Vivienda: {dwelling}
+            Acceso: {access}
+            Compañía: {company}
+            Niños: {child}
+            Otros animales: {otherAnimals}
+            Solo en casa: {aloneInHome}
+            Motivo: {why}
+            """
+
+       
+        elif form_type == "adoption":
+            
+            name = data.get("name")
+            email = data.get("email")
+            age = data.get("age")
+            phone = data.get("phone")
+            city = data.get("city")
+            dwelling = data.get("dwelling")
+            access = data.get("access")
+            company = data.get("company")
+            child = data.get("child")
+            otherAnimals = data.get("otherAnimals")
+            aloneInHome = data.get("aloneInHome")
+            why = data.get("why")
+
+            msg['Subject'] = f"Nuevo formulario de acogida de {name}"
+            body = f"""
+            Nombre: {name}
+            Edad: {age}
+            Teléfono: {phone}
+            Email: {email}
+            Ciudad: {city}
+            Vivienda: {dwelling}
+            Acceso: {access}
+            Compañía: {company}
+            Niños: {child}
+            Otros animales: {otherAnimals}
+            Solo en casa: {aloneInHome}
+            Motivo: {why}
+            """
+
+        else:
+            return jsonify({"success": False, "error": "Tipo de formulario no válido"}), 400
+
+        # Adjuntar cuerpo al mensaje
         msg.attach(MIMEText(body, 'plain', 'utf-8'))
 
         # Enviar correo
