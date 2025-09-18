@@ -112,7 +112,7 @@ export const DetailCat = () => {
                     <div className='d-flex justify-content-center'>
                         <button  
                         onClick={() => setMostrarPago(true)} 
-                        className='btn btn-info d-grid gap-2 col-3 mx-auto' >
+                        className='btn btn-primary-custom mt-3 w-100 d-grid gap-2 col-3 mx-auto' >
                             Donar
                         </button>
                         <Modal show={mostrarPago} onHide={() => setMostrarPago(false)} centered>

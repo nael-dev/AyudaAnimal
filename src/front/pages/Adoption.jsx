@@ -254,7 +254,7 @@ export const Adoption = () => {
                             {LoggedIn ? (
                                 <>
                                     <button
-                                        className="btn btn-info mt-3 w-100"
+                                        className="btn btn-primary-custom mt-3 w-100"
                                         onClick={() => {
                                             setSelectedCat(catItem);
                                             setMostrarPago(true);
