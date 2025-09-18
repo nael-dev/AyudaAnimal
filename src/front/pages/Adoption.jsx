@@ -1,46 +1,25 @@
-import Carousel from "../components/Carousel.jsx"
+import Carousel from "../components/Carousel.jsx";
 import { Card } from "../components/Card.jsx";
 import { useEffect, useState } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import fotobackground from '../assets/img/fotobackground.jpeg';
+import fotobackground from "../assets/img/fotobackground.jpeg";
+import { loadStripe } from "@stripe/stripe-js";
+import { Modal } from "react-bootstrap";
+import { Elements } from "@stripe/react-stripe-js";
+import { CheckoutForm } from "../components/CheckoutForm.jsx";
 
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 export const Adoption = () => {
-    const [cat, setCat] = useState([]);
-
-    const { store, dispatch } = useGlobalReducer()
-
-    useEffect(() => {
-
-        const handleGetCat = async () => {
-
-            try {
-                const backendUrl = import.meta.env.VITE_BACKEND_URL
-                if (!backendUrl) throw new Error('Backend error')
-                const response = await fetch(`${backendUrl}/api/cat`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error`);
-                }
-                const data = await response.json();
-
-                setCat(data.cats);
-            } catch (err) {
-                setError('Error cargando el gato: ' + err.message);
-                console.error('Error:', err);
-            }
-        };
-
-        handleGetCat();
-    }, [])
+    const [cats, setCats] = useState([]);
+    const [mostrarPago, setMostrarPago] = useState(false);
+    const [selectedCat, setSelectedCat] = useState(null);
+    const [amount, setAmount] = useState(0);
+    const [currency, setCurrency] = useState("EUR");
+    const { store, dispatch } = useGlobalReducer();
 
     const [form, setForm] = useState({
-        name: " ",
+        name: "",
         age: "",
         phone: "",
         email: "",
@@ -52,23 +31,15 @@ export const Adoption = () => {
         protection: "",
         otherAnimals: "",
         aloneInHome: "",
-        why: ""
-
-    })
-
-
+        why: "",
+    });
 
     const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value,
-        });
-    }
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(form)
-
-
         try {
             const resp = await fetch(
                 import.meta.env.VITE_BACKEND_URL + "/api/send-email",
@@ -78,7 +49,6 @@ export const Adoption = () => {
                     body: JSON.stringify(form),
                 }
             );
-
             const data = await resp.json();
             if (data.success) {
                 alert("✅ Formulario enviado correctamente, revisa tu correo");
@@ -89,70 +59,107 @@ export const Adoption = () => {
             alert("⚠️ Error de red: " + error.message);
         }
     };
+
+    const handleGetCats = async () => {
+        try {
+            const backendUrl = import.meta.env.VITE_BACKEND_URL;
+            if (!backendUrl) throw new Error("Backend error");
+            const response = await fetch(`${backendUrl}/api/cat`);
+            if (!response.ok) throw new Error("Error al cargar gatos");
+            const data = await response.json();
+            setCats(data.cats);
+        } catch (err) {
+            console.error("Error:", err);
+        }
+    };
+
+    const handlePostSponsor = async (catId) => {
+        try {
+            const backendUrl = import.meta.env.VITE_BACKEND_URL;
+            await fetch(`${backendUrl}/api/payment-registration`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                    amount,
+                    currency,
+                    cat_id: catId,
+                    date_payment: new Date().toISOString(),
+                }),
+            });
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
+    const handlePaymentSuccess = () => {
+        if (selectedCat) {
+            handlePostSponsor(selectedCat.id);
+        }
+        setMostrarPago(false);
+    };
+
+    useEffect(() => {
+        handleGetCats();
+    }, []);
+
+    const LoggedIn = !!localStorage.getItem("token");
+
     return (
-        <div className="p-4 " style={{ backgroundImage: `url(${fotobackground})`, backgroundSize: "cover", backgroundPosition: "center", minHeight: "800px" }}>
-
+        <div
+            className="p-4"
+            style={{
+                backgroundImage: `url(${fotobackground})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                minHeight: "800px",
+            }}
+        >
+            {/* Formulario */}
             <div className="content">
-                <h1 className="text-center p-2">Quieres adoptar?</h1>
-                <div class="container my-5">
-                    <div class="card shadow-lg border-0 rounded-4">
-                        <div class=" text-center p-4">
-                            <h3 class="mb-3">🐾 ¡Hazte casa de acogida y salva vidas! 🐾</h3>
-                            <p class="fs-5">
-                                En nuestra protectora recibimos muchos gatos que necesitan un lugar seguro donde recuperarse, socializar y esperar a su familia definitiva.
-                            </p>
-                            <p>
-                                Las casas de acogida son un <strong>pilar fundamental</strong> para nosotros: gracias a ellas, los gatos pueden salir del refugio o de la calle y vivir temporalmente en un hogar lleno de cuidados y cariño.
-                            </p>
-
-                            <h5 class="mt-4">👉 ¿Qué significa ser casa de acogida?</h5>
-                            <ul class="list-unstyled mt-3">
-                                <li>🏡 Ofrecer un espacio seguro y tranquilo a un gato de manera temporal.</li>
-                                <li>🍽️ Brindarle alimentación, agua, cariño y la atención diaria que necesita.</li>
-                                <li>🩺 Llevarlo al veterinario en caso de necesidad (nosotros asumimos los gastos).</li>
-                                <li>💞 Ayudarlo en su proceso de socialización para que esté listo para la adopción.</li>
-                            </ul>
-
-                            <p class="mt-4">
-                                💜 Lo único que pedimos es <strong>compromiso y responsabilidad</strong>.
-                                Nosotros nos encargamos de los gastos veterinarios y ofrecemos asesoramiento y apoyo en todo momento.
-                            </p>
-                            <p>
-                                Ser casa de acogida no solo salva vidas, también te da la oportunidad de vivir una experiencia única: acompañar a un gato en su camino hacia su hogar definitivo.
-                            </p>
-                            <p>Rellena este formulario y nos pondremos en contacto con vosotros.</p>
-
-
+                <h1 className="text-center p-2">¿Quieres adoptar?</h1>
+                <div className="container my-5">
+                    <div className="card shadow-lg border-0 rounded-4">
+                        <div className="text-center p-4">
+                            <h3 className="mb-3">🐾 Rellena el formulario para que sepamos más de ti 🐾</h3>
+                            <p>Rellena este formulario y nos pondremos en contacto contigo.</p>
                         </div>
                     </div>
                 </div>
+
                 <form onSubmit={handleSubmit} className="container-fluid">
                     <div className="row justify-content-center w-100">
                         <div className="col-12 col-sm-12 col-md-10 col-lg-8 col-xl-6">
                             <div className="input-box m-2">
                                 <h3>Sobre ti</h3>
-                                <input className="my-2 "
+                                <input
+                                    className="my-2"
                                     name="name"
-                                    type="name"
+                                    type="text"
                                     placeholder="Nombre"
                                     onChange={handleChange}
                                     required
                                 />
-                                <input className="my-2"
+                                <input
+                                    className="my-2"
                                     name="age"
-                                    type="age"
+                                    type="number"
                                     placeholder="Edad"
                                     onChange={handleChange}
                                     required
                                 />
-                                <input className="my-2"
+                                <input
+                                    className="my-2"
                                     name="phone"
-                                    type="`phone"
+                                    type="tel"
                                     placeholder="Teléfono"
                                     onChange={handleChange}
                                     required
                                 />
-                                <input className="my-2"
+                                <input
+                                    className="my-2"
                                     name="email"
                                     type="email"
                                     placeholder="Email"
@@ -160,6 +167,7 @@ export const Adoption = () => {
                                     required
                                 />
                             </div>
+
                             <div className="input-box m-2">
                                 <h3>Sobre el gatito</h3>
                                 <select className="my-2" name="city" onChange={handleChange} required>
@@ -229,20 +237,58 @@ export const Adoption = () => {
                                 />
                             </div>
 
-                            <button type="submit" className="btn-login mt-2">Enviar</button>
+
+                            <button type="submit" className="btn-login mt-2">
+                                Enviar
+                            </button>
                         </div>
                     </div>
-
-                </form >
+                </form>
             </div >
-            <div className="p-5">
-                <Carousel cards={cat.map((cat) => (
-                    <Card cat={cat} key={cat.id} />
-                )
-                )}
+
+            {/* Carrusel */}
+            < div className="p-5" >
+                <Carousel
+                    cards={cats.map((catItem) => (
+                        <Card cat={catItem} key={catItem.id}>
+                            {LoggedIn ? (
+                                <>
+                                    <button
+                                        className="btn btn-info mt-3 w-100"
+                                        onClick={() => {
+                                            setSelectedCat(catItem);
+                                            setMostrarPago(true);
+                                        }}
+                                    >
+                                        Donar
+                                    </button>
+
+                                    <Modal show={mostrarPago} onHide={() => setMostrarPago(false)} centered>
+                                        <Modal.Header closeButton>
+                                            <Modal.Title>Donar {selectedCat ? selectedCat.name : ""}</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>
+                                            <Elements stripe={stripePromise}>
+                                                <CheckoutForm
+                                                    amount={amount}
+                                                    setAmount={setAmount}
+                                                    currency={currency}
+                                                    setCurrency={setCurrency}
+                                                    onPaymentSuccess={handlePaymentSuccess}
+                                                />
+                                            </Elements>
+                                        </Modal.Body>
+                                    </Modal>
+                                </>
+                            ) : (
+                                <h6 className="text-center mt-3">
+                                    <strong>Por favor inicia sesión o regístrate para donar.</strong>
+                                </h6>
+                            )}
+                        </Card>
+                    ))}
                 />
-            </div>
-        </div>
-    
-    )
-}
+            </div >
+        </div >
+    );
+};

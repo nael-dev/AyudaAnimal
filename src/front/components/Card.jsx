@@ -3,7 +3,7 @@ import ImageUploader from "../components/ImageUploader";
 import { Link } from "react-router-dom";
 
 
-export const Card = ({ cat }) => {
+export const Card = ({ cat, children }) => {
 
 
 
@@ -20,6 +20,7 @@ export const Card = ({ cat }) => {
                 <Link to={`/detail-cat-page/${cat.id}`} className="mt-auto">
                     <button className="btn btn-primary-custom mt-3 w-100">Quiero saber más</button>
                 </Link>
+                {children}
             </div>
         </div>
 

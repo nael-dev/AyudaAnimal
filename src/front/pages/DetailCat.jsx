@@ -71,7 +71,7 @@ export const DetailCat = () => {
                     throw new Error(`Error`);
                 }
                 const data = await response.json();
-                console.log(currency)
+            
                 setCat(data.Cat);
             } catch (err) {
                 setError('Error cargando el gato: ' + err.message);
