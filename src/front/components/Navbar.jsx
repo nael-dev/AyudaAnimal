@@ -103,6 +103,10 @@ export const Navbar = () => {
               <ul className={`dropdown-menu dropdown-menu-end dropdown-menu-custom`}>
                 {isLoggedIn ? (
                   <>
+                   <li>
+                       <Link className="dropdown-item" to="/edit-user">Perfil de usuario</Link>
+                    </li>
+                    <li><hr className="dropdown-divider" /></li>
                     <li>
                       <Link className="dropdown-item" to="/user-data">Mis Donaciones</Link>
                     </li>

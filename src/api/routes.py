@@ -14,6 +14,7 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from datetime import datetime 
 
 
 ph = PasswordHasher()
@@ -115,6 +116,37 @@ def get_user_for_id(user_id):
         "User": user.serialize()
     }
     return jsonify(response_body), 200
+
+
+@api.route('/editUser', methods=['PUT'])
+@jwt_required()
+def edit_user():
+    try:
+        current_user_id = get_jwt_identity()  # ID del usuario logueado
+        data = request.get_json()
+
+        user = User.query.get(current_user_id)
+        if not user:
+            return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
+
+        editable_fields = ["name", "lastname", "birthdate"]
+        for field in editable_fields:
+            if field in data:
+                if field == "birthdate" and data[field]:
+                    user.birthdate = datetime.fromisoformat(data[field])
+                else:
+                    setattr(user, field, data[field])
+
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "user": user.serialize()
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 
 @api. route('/cat', methods=['POST'])
