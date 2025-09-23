@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import fotobackground from '../assets/img/fotobackground.jpeg';
+import ImageUploader from "../components/ImageUploader";
 
 export const UserData = () => {
   const { store } = useGlobalReducer();
@@ -69,30 +70,21 @@ export const UserData = () => {
             )}
 
             {payments.map((item, index) => (
-              <div
-                key={index}
-                className="mb-3 p-3 border rounded-3"
-                style={{ backgroundColor: "rgba(13, 110, 253, 0.1)" }}
+              <div 
+               key={item.id} 
+              className="d-flex align-items-center mb-3 p-3 border rounded-3" 
+              style={{ backgroundColor: "rgba(13, 110, 253, 0.1)" }}
               >
-                <h5 className="card-title text-primary fw-semibold">
-                  Nombre del gato: {item.sponsor.cat_name}
-                </h5>
-                <p className="card-text fw-semibold">
-                  Cantidad: <span className="text-dark">{item.amount}</span>{" "}
-                  <span className="text-primary">{store.currency}</span>
-                </p>
-                <p className="card-text">
-                  <strong>Fecha de Registro:</strong>{" "}
-                  {new Date(
-                    new Date(item.date_payment).getTime() + 2 * 60 * 60 * 1000 
-                  ).toLocaleString("es-ES", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
+                <ImageUploader idImage={item.sponsor.cat_image} size={120} />
+                <div className="ms-3">
+                  <h5 className="text-primary fw-semibold">{item.sponsor.cat_name}</h5>
+                  <p className="fw-semibold mb-1">
+                    Cantidad: <span className="text-dark">{item.amount}</span> <span className="text-primary">{store.currency}</span>
+                  </p>
+                  <p className="mb-0">
+                    <strong>Fecha:</strong> {new Date(item.date_payment).toLocaleDateString("es-ES")}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

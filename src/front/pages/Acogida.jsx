@@ -174,7 +174,7 @@ export const Acogida = () => {
                             <textarea name="aloneInHome" placeholder="¿Cuánto tiempo puedes dedicarle al gatito? ¿Cuánto tiempo estaría solo en casa?" onChange={handleChange} required />
                             <textarea name="why" placeholder="¿Por qué quieres ser casa de acogida?" onChange={handleChange} required />
                         </div>
-                        <button type="submit" className="btn-login mt-2">Enviar</button>
+                        <button type="submit" className="btn btn-primary-custom mt-3 w-100">Enviar</button>
                     </div>
                 </div>
             </form>

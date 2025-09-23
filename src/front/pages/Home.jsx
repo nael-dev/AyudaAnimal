@@ -10,10 +10,48 @@ import ListFoodCat from "../components/ListFoodCat.jsx";
 import ImageUploader from "../components/ImageUploader.jsx";
 import { Link } from "react-router-dom";
 import fotobackground from "../assets/img/fotobackground.jpeg";
+import { loadStripe } from "@stripe/stripe-js";
+import { Modal } from "react-bootstrap";
+import { Elements } from "@stripe/react-stripe-js";
+import { CheckoutForm } from "../components/CheckoutForm.jsx";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 export const Home = () => {
-  const [cat, setCat] = useState([]);
+  const [cats, setCats] = useState([]);
   const { store, dispatch } = useGlobalReducer();
+  const [mostrarPago, setMostrarPago] = useState(false);
+  const [amount, setAmount] = useState(0);
+  const [currency, setCurrency] = useState("EUR");
+  const [selectedCat, setSelectedCat] = useState(null);
+
+
+  const handlePostSponsor = async (catId) => {
+    try {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      await fetch(`${backendUrl}/api/payment-registration`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          amount,
+          currency,
+          cat_id: catId,
+          date_payment: new Date().toISOString(),
+        }),
+      });
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    if (selectedCat) handlePostSponsor(selectedCat.id);
+    setMostrarPago(false);
+  };
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -52,7 +90,7 @@ export const Home = () => {
 
         if (!response.ok) throw new Error(`Error`);
         const data = await response.json();
-        setCat(data.cats);
+        setCats(data.cats);
       } catch (err) {
         console.error("Error:", err);
       }
@@ -60,6 +98,8 @@ export const Home = () => {
 
     handleGetCat();
   }, []);
+
+  const LoggedIn = !!localStorage.getItem("token");
 
   const tips = [
     {
@@ -123,8 +163,39 @@ export const Home = () => {
         Conoce nuestros gatitos! <GiPawHeart />
       </h1>
       <Carousel
-        cards={cat.map((cat) => (
-          <Card cat={cat} key={cat.id} />
+        cards={cats.map((catItem) => (
+          <Card cat={catItem} key={catItem.id}>
+            {LoggedIn ? (
+              <>
+                <button
+                  className="btn btn-primary-custom mt-3 w-100"
+                  onClick={() => { setSelectedCat(catItem); setMostrarPago(true); }}
+                >
+                  Donar
+                </button>
+                <Modal show={mostrarPago} onHide={() => setMostrarPago(false)} centered>
+                  <Modal.Header closeButton>
+                    <Modal.Title>Donar {selectedCat ? selectedCat.name : ""}</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    <Elements stripe={stripePromise}>
+                      <CheckoutForm
+                        amount={amount}
+                        setAmount={setAmount}
+                        currency={currency}
+                        setCurrency={setCurrency}
+                        onPaymentSuccess={handlePaymentSuccess}
+                      />
+                    </Elements>
+                  </Modal.Body>
+                </Modal>
+              </>
+            ) : (
+              <h6 className="text-center mt-3">
+                <strong>Por favor inicia sesión o regístrate para donar.</strong>
+              </h6>
+            )}
+          </Card>
         ))}
       />
       <hr className="my-4 border-3 border-dark opacity-50" />

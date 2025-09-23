@@ -238,7 +238,7 @@ export const Adoption = () => {
                             </div>
 
 
-                            <button type="submit" className="btn-login mt-2">
+                            <button type="submit" className="btn btn-primary-custom mt-3 w-100">
                                 Enviar
                             </button>
                         </div>

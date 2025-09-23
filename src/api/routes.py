@@ -253,6 +253,7 @@ def payment_with_sponsor():
                 'cat_id': sponsor.cat_id,
                 'cat_name': cat.name if cat else None,
                 'user_id': sponsor.user_id,
+                'cat_image': cat.image if cat else None, 
                 'user_email': user.email if user else None
             }
         })
