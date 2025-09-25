@@ -5,7 +5,7 @@ services:
     region: fra
     pythonVersion: 3.13.4
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn main:app --chdir ./src/"
+    startCommand: "gunicorn wsgi:application --chdir ./src/"
     plan: free
     numInstances: 1
     envVars:
