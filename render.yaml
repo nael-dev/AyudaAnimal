@@ -3,8 +3,8 @@ services:
     name: ayuda-animal-web
     env: python
     region: fra
-    pythonVersion: 3.13.4
-    buildCommand: "pip install -r requirements.txt"
+    pythonVersion: 3.10.12
+    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt"
     startCommand: "gunicorn wsgi:application --chdir ./src/"
     plan: free
     numInstances: 1
@@ -12,7 +12,7 @@ services:
       - key: VITE_BASENAME
         value: /
       - key: FLASK_APP
-        value: main.py
+        value: src/app.py
       - key: FLASK_ENV
         value: production
       - key: FLASK_APP_KEY
@@ -22,3 +22,9 @@ services:
           name: postgresql-trapezoidal-42170
           property: connectionString
     healthCheckPath: /health
+
+databases:
+  - name: postgresql-trapezoidal-42170
+    region: fra
+    plan: free
+    ipAllowList: []

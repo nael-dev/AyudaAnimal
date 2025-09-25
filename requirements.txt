@@ -6,7 +6,7 @@ flask==2.3.3
 flask-admin==1.6.1
 flask-cors==3.0.10
 flask-migrate==4.0.1
-flask-sqlalchemy==3.0.5
+flask-sqlalchemy==2.5.1
 flask-swagger==0.2.14
 gunicorn==21.2.0
 itsdangerous==2.1.2
@@ -19,8 +19,7 @@ python-dotenv==1.0.1
 python-editor==1.0.4
 PyYAML>=6.0.2,<7.0
 six==1.16.0
-sqlalchemy==2.0.21
+sqlalchemy==1.4.48
 cloudinary==1.30.0
-urllib3>=1.26.5,<2
 werkzeug==2.3.8
 wtforms==3.0.1
