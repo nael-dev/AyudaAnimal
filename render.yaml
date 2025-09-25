@@ -1,20 +1,18 @@
-# Render configuration file
-# Docs: https://render.com/docs/yaml-spec
 services:
   - type: web
     name: ayuda-animal-web
     env: python
     region: fra
-    pythonVersion: 3.10.12
+    pythonVersion: 3.13.4
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn wsgi:app --chdir ./src/"
+    startCommand: "gunicorn main:app --chdir ./src/"
     plan: free
     numInstances: 1
     envVars:
       - key: VITE_BASENAME
         value: /
       - key: FLASK_APP
-        value: src/app.py
+        value: main.py
       - key: FLASK_ENV
         value: production
       - key: FLASK_APP_KEY
@@ -24,9 +22,3 @@ services:
           name: postgresql-trapezoidal-42170
           property: connectionString
     healthCheckPath: /health
-
-databases:
-  - name: postgresql-trapezoidal-42170
-    region: fra
-    plan: free
-    ipAllowList: []
