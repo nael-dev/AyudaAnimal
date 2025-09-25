@@ -6,6 +6,7 @@ services:
       region: ohio
       name: sample-service-name
       env: python # valid values: https://render.com/docs/yaml-spec#environment
+      pythonVersion: 3.10.12
       buildCommand: "./render_build.sh"
       startCommand: "gunicorn wsgi --chdir ./src/"
       plan: free # optional; defaults to starter
