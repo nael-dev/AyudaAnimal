@@ -16,27 +16,26 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 
-
 ph = PasswordHasher()
-
 api = Blueprint('api', __name__)
 
+# CORS: permitir frontend local y desplegado
+frontend_urls = [
+    "https://super-duper-capybara-q74x9x54gxg924jjp-3000.app.github.dev",
+    "https://ayudaanimal-1.onrender.com"
+]
+CORS(api, resources={r"/*": {"origins": frontend_urls}})
 
-CORS(api, resources={
-     r"/*": {"origins": "https://super-duper-capybara-q74x9x54gxg924jjp-3000.app.github.dev"}})
-
-
+# -------------------- Usuarios --------------------
 @api.route('/signup', methods=['POST'])
 def create_user():
     body = request.get_json()
-
     required_fields = ['email', 'password']
     if not all(field in body for field in required_fields):
         return jsonify({'err': 'Bad request, missing email or password'}), 400
 
     search_exist = select(User).where(User.email == body['email'])
     already_exist = db.session.execute(search_exist).scalar_one_or_none()
-
     if already_exist:
         return jsonify({"error": "User already exists"}), 409
 
@@ -45,15 +44,10 @@ def create_user():
     except Exception:
         return jsonify({'error': 'Failed to hash password'}), 500
 
-    user = User(
-        email=body['email'],
-        password=hashed_password
-    )
+    user = User(email=body['email'], password=hashed_password)
     db.session.add(user)
     db.session.commit()
-
     return jsonify({'Ok': "User created"}), 201
-
 
 @api.route('/login', methods=['POST'])
 def login():
@@ -61,15 +55,12 @@ def login():
     if 'email' not in body or 'password' not in body:
         return jsonify({'err': 'Bad request'}), 400
 
-    email = body['email']
-    password = body['password']
-    user = User.query.filter_by(email=email).first()
-
-    if user is None:
-        return jsonify({"err": " User not exist"}), 404
+    user = User.query.filter_by(email=body['email']).first()
+    if not user:
+        return jsonify({"err": "User not exist"}), 404
 
     try:
-        ph.verify(user.password, password)
+        ph.verify(user.password, body['password'])
     except VerifyMismatchError:
         return jsonify({'err': 'Invalid password'}), 401
     except Exception:
@@ -77,54 +68,35 @@ def login():
 
     token = create_access_token(identity=str(user.id))
     is_admin = user.email == 'admin@admin.com'
-
-    return jsonify({'token': token,
-                    'is_admin': is_admin
-                    }), 200
-
+    return jsonify({'token': token, 'is_admin': is_admin}), 200
 
 @api.route('/user/user-data', methods=['GET'])
 @jwt_required()
 def user_data():
     current_user_id = get_jwt_identity()
-
     user = db.session.get(User, int(current_user_id))
-    if user is None:
+    if not user:
         return jsonify({"err": "User not exist"}), 400
-    user = user.serialize()
-    return jsonify({"user": user}), 200
-
+    return jsonify({"user": user.serialize()}), 200
 
 @api.route('/user', methods=['GET'])
 def get_all_user():
     all_users = db.session.execute(select(User)).scalars().all()
-    all_users = list(map(lambda user: user.serialize(), all_users))
-
-    response_body = {
-        "Users": all_users
-    }
-
-    return jsonify(response_body), 200
-
+    return jsonify({"Users": [user.serialize() for user in all_users]}), 200
 
 @api.route('/user/<int:user_id>', methods=['GET'])
 def get_user_for_id(user_id):
     user = db.session.get(User, user_id)
-    if user is None:
+    if not user:
         return jsonify({'err': "User not found"}), 404
-    response_body = {
-        "User": user.serialize()
-    }
-    return jsonify(response_body), 200
-
+    return jsonify({"User": user.serialize()}), 200
 
 @api.route('/editUser', methods=['PUT'])
 @jwt_required()
 def edit_user():
     try:
-        current_user_id = get_jwt_identity()  # ID del usuario logueado
+        current_user_id = get_jwt_identity()
         data = request.get_json()
-
         user = User.query.get(current_user_id)
         if not user:
             return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
@@ -138,101 +110,106 @@ def edit_user():
                     setattr(user, field, data[field])
 
         db.session.commit()
-
-        return jsonify({
-            "success": True,
-            "user": user.serialize()
-        })
-
+        return jsonify({"success": True, "user": user.serialize()}), 200
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-
-@api. route('/cat', methods=['POST'])
+# -------------------- Gatos --------------------
+@api.route('/cat', methods=['POST'])
 def create_cat():
     body = request.get_json()
-
-    if 'name' not in body or 'age' not in body or "race" not in body or "castration" not in body or "character" not in body or "image" not in body or "history" not in body:
+    required_fields = ['name', 'age', 'race', 'castration', 'character', 'image', 'history']
+    if not all(field in body for field in required_fields):
         return jsonify({'err': 'Bad request'}), 400
 
     search_exist = select(Cat).where(Cat.name == body['name'])
     alredy_exist = db.session.execute(search_exist).scalar_one_or_none()
-
     if alredy_exist:
         return jsonify({'err': 'The cat already exists'}), 409
 
-    cat = Cat()
-    cat.name = body['name']
-    cat.age = body['age']
-    cat.race = body['race']
-    cat.castration = body['castration']
-    cat.character = body['character']
-    cat.history = body['history']
-    cat.image = body['image']
+    cat = Cat(**{field: body[field] for field in required_fields})
     db.session.add(cat)
     db.session.commit()
-
     return jsonify({'ok': 'Cat added'}), 201
-
 
 @api.route('/cat', methods=['GET'])
 def get_all_cat():
-
     all_cats = db.session.execute(select(Cat)).scalars().all()
-    all_cats = list(map(lambda cat: cat.serialize(), all_cats))
-
-    response_body = {
-        "cats": all_cats
-    }
-
-    return jsonify(response_body), 200
-
+    return jsonify({"cats": [cat.serialize() for cat in all_cats]}), 200
 
 @api.route('/cat/<int:cat_id>', methods=['GET'])
 def get_cat_for_id(cat_id):
     cat = db.session.get(Cat, cat_id)
-    if cat is None:
+    if not cat:
         return jsonify({'err': "Cat not found"}), 404
-    response_body = {
-        "Cat": cat.serialize()
-    }
-    return jsonify(response_body), 200
+    return jsonify({"Cat": cat.serialize()}), 200
 
+@api.route('/cat/<int:cat_id>', methods=['PUT'])
+def edit_cat(cat_id):
+    cat = db.session.get(Cat, cat_id)
+    if not cat:
+        return jsonify({'error': 'Cat not found'}), 404
 
+    data = request.get_json()
+    editable_fields = ["name", "age", "race", "castration", "character", "history", "image"]
+    for field in editable_fields:
+        if field in data:
+            setattr(cat, field, data[field])
+
+    db.session.commit()
+    return jsonify({'success': True, 'cat': cat.serialize()}), 200
+
+@api.route('/cat/<int:cat_id>', methods=['PATCH'])
+def update_cat(cat_id):
+    cat = db.session.get(Cat, cat_id)
+    if not cat:
+        return jsonify({'error': 'Cat not found'}), 404
+
+    data = request.get_json()
+    allowed_fields = ["name", "age", "race", "castration", "character", "history", "image"]
+    for field in allowed_fields:
+        if field in data:
+            setattr(cat, field, data[field])
+
+    db.session.commit()
+    return jsonify({'success': True, 'cat': cat.serialize()}), 200
+
+@api.route('/cat/<int:cat_id>', methods=['DELETE'])
+def handle_delete_cat(cat_id):
+    cat = db.session.get(Cat, cat_id)
+    if not cat:
+        return jsonify({"error": "Cat not found"}), 404
+    try:
+        db.session.delete(cat)
+        db.session.commit()
+        return jsonify({"message": "Cat deleted"}), 200
+    except exc.IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "Cannot delete Cat: it is referenced by other records"})
+
+# -------------------- Sponsors --------------------
 @api.route('/sponsor', methods=['POST'])
 def create_sponsor():
     body = request.get_json()
-
     if "user_id" not in body or "cat_id" not in body:
-        return ({"err": 'Bad request'}), 400
+        return jsonify({'err': 'Bad request'}), 400
 
-    sponsor = Sponsor()
-    sponsor.user_id = body['user_id']
-    sponsor.cat_id = body['cat_id']
+    sponsor = Sponsor(user_id=body['user_id'], cat_id=body['cat_id'])
     db.session.add(sponsor)
     db.session.commit()
-
     return jsonify({'ok': "sponsor add"}), 201
-
 
 @api.route('/sponsor', methods=['GET'])
 def get_all_sponsor():
     all_sponsor = db.session.execute(select(Sponsor)).scalars().all()
-    all_sponsor = list(map(lambda sponsor: sponsor.serialize(), all_sponsor))
+    return jsonify({"Sponsor": [s.serialize() for s in all_sponsor]}), 200
 
-    response_body = {
-        "Sponsor": all_sponsor
-    }
-
-    return jsonify(response_body), 200
-
-
+# -------------------- Payments --------------------
 @api.route('/payment-registration', methods=['POST'])
 @jwt_required()
 def create_payment():
     body = request.get_json()
     current_user_id = get_jwt_identity()
-
     if "cat_id" not in body or "amount" not in body or "date_payment" not in body:
         return jsonify({'err': 'Bad request'}), 400
 
@@ -246,257 +223,10 @@ def create_payment():
             Sponsor.cat_id == cat_id
         )
     ).scalar_one_or_none()
-
     if sponsor is None:
         sponsor = Sponsor(user_id=current_user_id, cat_id=cat_id)
         db.session.add(sponsor)
         db.session.commit()
 
-    payment = PaymentRegistration(
-        sponsor_id=sponsor.id,
-        amount=amount,
-        date_payment=date_payment
-    )
+    payment = PaymentRegistration(sponsor_id=sponsor.id, amount=amount, date_payment=date_payment)
     db.session.add(payment)
-    db.session.commit()
-
-    return jsonify({'ok': 'Payment and sponsorship registered'}), 201
-
-
-@api.route('/payment-registration', methods=['GET'])
-@jwt_required()
-def payment_with_sponsor():
-    current_user_id = get_jwt_identity()
-    all_payments = (db.session.query(PaymentRegistration) .join(Sponsor).filter(Sponsor.user_id == int(current_user_id)).all()
-                    )
-
-    results = []
-    for payment in all_payments:
-        sponsor = payment.sponsor
-        user = sponsor.user_sponsor
-        cat = sponsor.cat
-        results.append({
-            'id': payment.id,
-            'amount': payment.amount,
-            'date_payment': str(payment.date_payment),
-            'sponsor': {
-                'id': sponsor.id,
-                'cat_id': sponsor.cat_id,
-                'cat_name': cat.name if cat else None,
-                'user_id': sponsor.user_id,
-                'cat_image': cat.image if cat else None,
-                'user_email': user.email if user else None
-            }
-        })
-    return jsonify({"payments": results}), 201
-
-
-@api.route('/payment-registration-admin', methods=['GET'])
-@jwt_required()
-def payment_with_sponsor_admin():
-    all_payments = (db.session.query(PaymentRegistration).all()
-                    )
-    results = []
-    for payment in all_payments:
-        sponsor = payment.sponsor
-        user = sponsor.user_sponsor
-        cat = sponsor.cat
-
-        results.append({
-            'id': payment.id,
-            'amount': payment.amount,
-            'date_payment': str(payment.date_payment),
-            'sponsor': {
-                'id': sponsor.id,
-                'cat_id': sponsor.cat_id,
-                'cat_name': cat.name if cat else None,
-                'user_id': sponsor.user_id,
-                'user_email': user.email if user else None
-            }
-        })
-
-    return jsonify({"payments": results}), 200
-
-
-@api.route('/cat/<int:cat_id>', methods=['DELETE'])
-def handle_delete_cat(cat_id):
-    cat = db.session.get(Cat, cat_id)
-
-    if cat is None:
-        return jsonify({"error": "Cat not found"}), 404
-
-    try:
-        db.session.delete(cat)
-        db.session.commit()
-        return jsonify({"message": "Cat deleted"}), 200
-    except exc.IntegrityError:
-        db.session.rollback()
-        return jsonify({"error": "Cannot delete Cat: it is referenced by other records"})
-
-
-@api.route('/user/<int:user_id>', methods=['DELETE'])
-def handle_delete_user(user_id):
-    user = db.session.get(User, user_id)
-
-    if user is None:
-        return jsonify({"error": "User not found"}), 404
-
-    try:
-        db.session.delete(user)
-        db.session.commit()
-        return jsonify({"message": "User deleted"}), 200
-    except exc.IntegrityError:
-        db.session.rollback()
-        return jsonify({"error": "cannot delete User: It`s reference by other records"})
-
-
-stripe.api_key = 'sk_test_51RahuCFMs8PtSpw5R8ZDgpeE3cGPxARTavpjBSoP2YJJGvyYEUOEHF9J0QgrbVQHyTv9K86mZETEuKJHZODPQOuT00mb5wz0An'
-
-
-@api.route('/create-checkout-session', methods=['POST'])
-def create_checkout_session():
-    try:
-        data = request.json
-        intent = stripe.PaymentIntent.create(
-            amount=data['amount'],
-            currency=data['currency'],
-            automatic_payment_methods={'enabled': True
-                                       }
-        )
-        return jsonify({
-            'clientSecret': intent['client_secret']
-        })
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-
-@api.route("/send-email", methods=["POST"])
-def send_email():
-    data = request.get_json()
-    form_type = data.get("formType")
-
-    # Configuración SMTP
-    smtp_server = "smtp.gmail.com"
-    smtp_port = 587
-    sender_email = os.getenv("EMAIL_USER")
-    sender_password = os.getenv("EMAIL_PASS")
-
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = sender_email
-
-        if form_type == "acogida":
-            name = data.get("name")
-            email = data.get("email")
-            age = data.get("age")
-            phone = data.get("phone")
-            city = data.get("city")
-            dwelling = data.get("dwelling")
-            access = data.get("access")
-            company = data.get("company")
-            child = data.get("child")
-            otherAnimals = data.get("otherAnimals")
-            aloneInHome = data.get("aloneInHome")
-            why = data.get("why")
-
-            msg['Subject'] = f"Nuevo formulario de acogida de {name}"
-            body = f"""
-            Nombre: {name}
-            Edad: {age}
-            Teléfono: {phone}
-            Email: {email}
-            Ciudad: {city}
-            Vivienda: {dwelling}
-            Acceso: {access}
-            Compañía: {company}
-            Niños: {child}
-            Otros animales: {otherAnimals}
-            Solo en casa: {aloneInHome}
-            Motivo: {why}
-            """
-
-        elif form_type == "adoption":
-
-            name = data.get("name")
-            email = data.get("email")
-            age = data.get("age")
-            phone = data.get("phone")
-            city = data.get("city")
-            dwelling = data.get("dwelling")
-            access = data.get("access")
-            company = data.get("company")
-            child = data.get("child")
-            otherAnimals = data.get("otherAnimals")
-            aloneInHome = data.get("aloneInHome")
-            why = data.get("why")
-
-            msg['Subject'] = f"Nuevo formulario de acogida de {name}"
-            body = f"""
-            Nombre: {name}
-            Edad: {age}
-            Teléfono: {phone}
-            Email: {email}
-            Ciudad: {city}
-            Vivienda: {dwelling}
-            Acceso: {access}
-            Compañía: {company}
-            Niños: {child}
-            Otros animales: {otherAnimals}
-            Solo en casa: {aloneInHome}
-            Motivo: {why}
-            """
-
-        else:
-            return jsonify({"success": False, "error": "Tipo de formulario no válido"}), 400
-
-        # Adjuntar cuerpo al mensaje
-        msg.attach(MIMEText(body, 'plain', 'utf-8'))
-
-        # Enviar correo
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, sender_email, msg.as_string())
-        server.quit()
-
-        return jsonify({"success": True, "message": "Correo enviado"}), 200
-
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
-
-    @api.route('/cat/<int:cat_id>', methods=['PUT'])
-def edit_cat(cat_id):
-    cat = db.session.get(Cat, cat_id)
-    if not cat:
-        return jsonify({'error': 'Cat not found'}), 404
-
-    data = request.get_json()
-    editable_fields = ["name", "age", "race",
-                       "castration", "character", "history", "image"]
-
-    for field in editable_fields:
-        if field in data:
-            setattr(cat, field, data[field])
-
-    db.session.commit()
-    return jsonify({'success': True, 'cat': cat.serialize()}), 200
-
-
-@api.route('/cat/<int:cat_id>', methods=['PATCH'])
-def update_cat(cat_id):
-    cat = db.session.get(Cat, cat_id)
-    if not cat:
-        return jsonify({'error': 'Cat not found'}), 404
-
-    data = request.get_json()
-    allowed_fields = ["name", "age", "race",
-                      "castration", "character", "history", "image"]
-
-    for field in allowed_fields:
-        if field in data:
-            setattr(cat, field, data[field])
-
-    db.session.commit()
-    return jsonify({'success': True, 'cat': cat.serialize()}), 200
