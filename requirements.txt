@@ -25,3 +25,4 @@ sqlalchemy>=2.0.0,<2.1.0
 cloudinary==1.30.0
 werkzeug==2.3.8
 wtforms==3.0.1
+stripe==8.5.0
