@@ -259,7 +259,7 @@ stripe.api_key = 'sk_test_51RahuCFMs8PtSpw5R8ZDgpeE3cGPxARTavpjBSoP2YJJGvyYEUOEH
 @api.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
     try:
-        data = request.json
+        data = request.get_json()
         intent = stripe.PaymentIntent.create(
             amount=data['amount'],
             currency=data['currency'],
