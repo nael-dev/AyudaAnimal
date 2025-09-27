@@ -24,7 +24,7 @@ app.url_map.strict_slashes = False
 # Permitir frontend local y el frontend desplegado
 frontend_urls = [
     "https://super-duper-capybara-q74x9x54gxg924jjp-3000.app.github.dev",  # local dev
-    "https://mi-front.onrender.com"  # reemplaza con tu frontend en Render
+    "https://ayudaanimal-1.onrender.com"  # reemplaza con tu frontend en Render
 ]
 CORS(app, resources={r"/*": {"origins": frontend_urls}})
 
