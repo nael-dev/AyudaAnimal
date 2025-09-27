@@ -27,6 +27,8 @@ frontend_urls = [
 CORS(api, resources={r"/*": {"origins": frontend_urls}})
 
 # -------------------- Usuarios --------------------
+
+
 @api.route('/signup', methods=['POST'])
 def create_user():
     body = request.get_json()
@@ -49,6 +51,7 @@ def create_user():
     db.session.commit()
     return jsonify({'Ok': "User created"}), 201
 
+
 @api.route('/login', methods=['POST'])
 def login():
     body = request.get_json()
@@ -70,6 +73,7 @@ def login():
     is_admin = user.email == 'admin@admin.com'
     return jsonify({'token': token, 'is_admin': is_admin}), 200
 
+
 @api.route('/user/user-data', methods=['GET'])
 @jwt_required()
 def user_data():
@@ -79,10 +83,12 @@ def user_data():
         return jsonify({"err": "User not exist"}), 400
     return jsonify({"user": user.serialize()}), 200
 
+
 @api.route('/user', methods=['GET'])
 def get_all_user():
     all_users = db.session.execute(select(User)).scalars().all()
     return jsonify({"Users": [user.serialize() for user in all_users]}), 200
+
 
 @api.route('/user/<int:user_id>', methods=['GET'])
 def get_user_for_id(user_id):
@@ -90,6 +96,7 @@ def get_user_for_id(user_id):
     if not user:
         return jsonify({'err': "User not found"}), 404
     return jsonify({"User": user.serialize()}), 200
+
 
 @api.route('/editUser', methods=['PUT'])
 @jwt_required()
@@ -115,10 +122,13 @@ def edit_user():
         return jsonify({"success": False, "error": str(e)}), 500
 
 # -------------------- Gatos --------------------
+
+
 @api.route('/cat', methods=['POST'])
 def create_cat():
     body = request.get_json()
-    required_fields = ['name', 'age', 'race', 'castration', 'character', 'image', 'history']
+    required_fields = ['name', 'age', 'race',
+                       'castration', 'character', 'image', 'history']
     if not all(field in body for field in required_fields):
         return jsonify({'err': 'Bad request'}), 400
 
@@ -132,10 +142,12 @@ def create_cat():
     db.session.commit()
     return jsonify({'ok': 'Cat added'}), 201
 
+
 @api.route('/cat', methods=['GET'])
 def get_all_cat():
     all_cats = db.session.execute(select(Cat)).scalars().all()
     return jsonify({"cats": [cat.serialize() for cat in all_cats]}), 200
+
 
 @api.route('/cat/<int:cat_id>', methods=['GET'])
 def get_cat_for_id(cat_id):
@@ -144,6 +156,7 @@ def get_cat_for_id(cat_id):
         return jsonify({'err': "Cat not found"}), 404
     return jsonify({"Cat": cat.serialize()}), 200
 
+
 @api.route('/cat/<int:cat_id>', methods=['PUT'])
 def edit_cat(cat_id):
     cat = db.session.get(Cat, cat_id)
@@ -151,13 +164,15 @@ def edit_cat(cat_id):
         return jsonify({'error': 'Cat not found'}), 404
 
     data = request.get_json()
-    editable_fields = ["name", "age", "race", "castration", "character", "history", "image"]
+    editable_fields = ["name", "age", "race",
+                       "castration", "character", "history", "image"]
     for field in editable_fields:
         if field in data:
             setattr(cat, field, data[field])
 
     db.session.commit()
     return jsonify({'success': True, 'cat': cat.serialize()}), 200
+
 
 @api.route('/cat/<int:cat_id>', methods=['PATCH'])
 def update_cat(cat_id):
@@ -166,13 +181,15 @@ def update_cat(cat_id):
         return jsonify({'error': 'Cat not found'}), 404
 
     data = request.get_json()
-    allowed_fields = ["name", "age", "race", "castration", "character", "history", "image"]
+    allowed_fields = ["name", "age", "race",
+                      "castration", "character", "history", "image"]
     for field in allowed_fields:
         if field in data:
             setattr(cat, field, data[field])
 
     db.session.commit()
     return jsonify({'success': True, 'cat': cat.serialize()}), 200
+
 
 @api.route('/cat/<int:cat_id>', methods=['DELETE'])
 def handle_delete_cat(cat_id):
@@ -188,6 +205,8 @@ def handle_delete_cat(cat_id):
         return jsonify({"error": "Cannot delete Cat: it is referenced by other records"})
 
 # -------------------- Sponsors --------------------
+
+
 @api.route('/sponsor', methods=['POST'])
 def create_sponsor():
     body = request.get_json()
@@ -199,12 +218,15 @@ def create_sponsor():
     db.session.commit()
     return jsonify({'ok': "sponsor add"}), 201
 
+
 @api.route('/sponsor', methods=['GET'])
 def get_all_sponsor():
     all_sponsor = db.session.execute(select(Sponsor)).scalars().all()
     return jsonify({"Sponsor": [s.serialize() for s in all_sponsor]}), 200
 
 # -------------------- Payments --------------------
+
+
 @api.route('/payment-registration', methods=['POST'])
 @jwt_required()
 def create_payment():
@@ -228,5 +250,124 @@ def create_payment():
         db.session.add(sponsor)
         db.session.commit()
 
-    payment = PaymentRegistration(sponsor_id=sponsor.id, amount=amount, date_payment=date_payment)
+    payment = PaymentRegistration(
+        sponsor_id=sponsor.id, amount=amount, date_payment=date_payment)
     db.session.add(payment)
+
+# -------------------- checkout session --------------------
+stripe.api_key = 'sk_test_51RahuCFMs8PtSpw5R8ZDgpeE3cGPxARTavpjBSoP2YJJGvyYEUOEHF9J0QgrbVQHyTv9K86mZETEuKJHZODPQOuT00mb5wz0An'
+@api.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    try:
+        data = request.json
+        intent = stripe.PaymentIntent.create(
+            amount=data['amount'],
+            currency=data['currency'],
+            automatic_payment_methods={'enabled': True
+                                       }
+        )
+        return jsonify({
+            'clientSecret': intent['client_secret']
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+# -------------------- Email formularios --------------------
+
+@api.route("/send-email", methods=["POST"])
+def send_email():
+    data = request.get_json()
+    form_type = data.get("formType")
+
+    # Configuración SMTP
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    sender_email = os.getenv("EMAIL_USER")
+    sender_password = os.getenv("EMAIL_PASS")
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = sender_email
+
+    
+        if form_type == "acogida":
+            name = data.get("name")
+            email = data.get("email")
+            age = data.get("age")
+            phone = data.get("phone")
+            city = data.get("city")
+            dwelling = data.get("dwelling")
+            access = data.get("access")
+            company = data.get("company")
+            child = data.get("child")
+            otherAnimals = data.get("otherAnimals")
+            aloneInHome = data.get("aloneInHome")
+            why = data.get("why")
+
+            msg['Subject'] = f"Nuevo formulario de acogida de {name}"
+            body = f"""
+            Nombre: {name}
+            Edad: {age}
+            Teléfono: {phone}
+            Email: {email}
+            Ciudad: {city}
+            Vivienda: {dwelling}
+            Acceso: {access}
+            Compañía: {company}
+            Niños: {child}
+            Otros animales: {otherAnimals}
+            Solo en casa: {aloneInHome}
+            Motivo: {why}
+            """
+
+       
+        elif form_type == "adoption":
+            
+            name = data.get("name")
+            email = data.get("email")
+            age = data.get("age")
+            phone = data.get("phone")
+            city = data.get("city")
+            dwelling = data.get("dwelling")
+            access = data.get("access")
+            company = data.get("company")
+            child = data.get("child")
+            otherAnimals = data.get("otherAnimals")
+            aloneInHome = data.get("aloneInHome")
+            why = data.get("why")
+
+            msg['Subject'] = f"Nuevo formulario de acogida de {name}"
+            body = f"""
+            Nombre: {name}
+            Edad: {age}
+            Teléfono: {phone}
+            Email: {email}
+            Ciudad: {city}
+            Vivienda: {dwelling}
+            Acceso: {access}
+            Compañía: {company}
+            Niños: {child}
+            Otros animales: {otherAnimals}
+            Solo en casa: {aloneInHome}
+            Motivo: {why}
+            """
+
+        else:
+            return jsonify({"success": False, "error": "Tipo de formulario no válido"}), 400
+
+        # Adjuntar cuerpo al mensaje
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+
+        # Enviar correo
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, sender_email, msg.as_string())
+        server.quit()
+
+        return jsonify({"success": True, "message": "Correo enviado"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
