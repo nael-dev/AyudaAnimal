@@ -466,3 +466,35 @@ def send_email():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+    
+    @api.route('/cat/<int:cat_id>', methods=['PUT'])
+def edit_cat(cat_id):
+    cat = db.session.get(Cat, cat_id)
+    if not cat:
+        return jsonify({'error': 'Cat not found'}), 404
+
+    data = request.get_json()
+    editable_fields = ["name", "age", "race", "castration", "character", "history", "image"]
+
+    for field in editable_fields:
+        if field in data:
+            setattr(cat, field, data[field])
+
+    db.session.commit()
+    return jsonify({'success': True, 'cat': cat.serialize()}), 200
+
+@api.route('/cat/<int:cat_id>', methods=['PATCH'])
+def update_cat(cat_id):
+    cat = db.session.get(Cat, cat_id)
+    if not cat:
+        return jsonify({'error': 'Cat not found'}), 404
+
+    data = request.get_json()
+    allowed_fields = ["name", "age", "race", "castration", "character", "history", "image"]
+
+    for field in allowed_fields:
+        if field in data:
+            setattr(cat, field, data[field])
+
+    db.session.commit()
+    return jsonify({'success': True, 'cat': cat.serialize()}), 200
