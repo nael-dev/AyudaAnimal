@@ -14,7 +14,7 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime 
+from datetime import datetime
 
 
 ph = PasswordHasher()
@@ -146,7 +146,6 @@ def edit_user():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-
 
 
 @api. route('/cat', methods=['POST'])
@@ -285,7 +284,7 @@ def payment_with_sponsor():
                 'cat_id': sponsor.cat_id,
                 'cat_name': cat.name if cat else None,
                 'user_id': sponsor.user_id,
-                'cat_image': cat.image if cat else None, 
+                'cat_image': cat.image if cat else None,
                 'user_email': user.email if user else None
             }
         })
@@ -352,6 +351,8 @@ def handle_delete_user(user_id):
 
 
 stripe.api_key = 'sk_test_51RahuCFMs8PtSpw5R8ZDgpeE3cGPxARTavpjBSoP2YJJGvyYEUOEHF9J0QgrbVQHyTv9K86mZETEuKJHZODPQOuT00mb5wz0An'
+
+
 @api.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
     try:
@@ -386,7 +387,6 @@ def send_email():
         msg['From'] = sender_email
         msg['To'] = sender_email
 
-    
         if form_type == "acogida":
             name = data.get("name")
             email = data.get("email")
@@ -417,9 +417,8 @@ def send_email():
             Motivo: {why}
             """
 
-       
         elif form_type == "adoption":
-            
+
             name = data.get("name")
             email = data.get("email")
             age = data.get("age")
@@ -466,7 +465,7 @@ def send_email():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-    
+
     @api.route('/cat/<int:cat_id>', methods=['PUT'])
 def edit_cat(cat_id):
     cat = db.session.get(Cat, cat_id)
@@ -474,7 +473,8 @@ def edit_cat(cat_id):
         return jsonify({'error': 'Cat not found'}), 404
 
     data = request.get_json()
-    editable_fields = ["name", "age", "race", "castration", "character", "history", "image"]
+    editable_fields = ["name", "age", "race",
+                       "castration", "character", "history", "image"]
 
     for field in editable_fields:
         if field in data:
@@ -483,6 +483,7 @@ def edit_cat(cat_id):
     db.session.commit()
     return jsonify({'success': True, 'cat': cat.serialize()}), 200
 
+
 @api.route('/cat/<int:cat_id>', methods=['PATCH'])
 def update_cat(cat_id):
     cat = db.session.get(Cat, cat_id)
@@ -490,7 +491,8 @@ def update_cat(cat_id):
         return jsonify({'error': 'Cat not found'}), 404
 
     data = request.get_json()
-    allowed_fields = ["name", "age", "race", "castration", "character", "history", "image"]
+    allowed_fields = ["name", "age", "race",
+                      "castration", "character", "history", "image"]
 
     for field in allowed_fields:
         if field in data:
