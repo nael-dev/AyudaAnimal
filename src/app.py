@@ -23,7 +23,7 @@ app.url_map.strict_slashes = False
 
 # ---- Configuración CORS ----
 # Permitir cualquier origen que llame a la API
-CORS(app, resources={r"/api/*": {"origins": "https://ayudaanimal-1.onrender.com"}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # ---- Configuración Base de Datos ----
 db_url = os.getenv("DATABASE_URL")
@@ -47,10 +47,12 @@ app.register_blueprint(api, url_prefix='/api')
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    """Servir la aplicación Vite frontend desde dist/"""
-    if path != "" and os.path.exists(os.path.join(static_file_dir, path)):
+    full_path = os.path.join(static_file_dir, path)
+    if path != "" and os.path.exists(full_path):
         return send_from_directory(static_file_dir, path)
+    # Siempre retornar index.html para rutas SPA
     return send_from_directory(static_file_dir, 'index.html')
+
 
 # ---- Manejo de errores ----
 @app.errorhandler(APIException)
