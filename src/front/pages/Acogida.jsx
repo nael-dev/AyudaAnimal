@@ -20,6 +20,7 @@ export const Acogida = () => {
     const { store, dispatch } = useGlobalReducer();
 
     const [form, setForm] = useState({
+        formType: "acogida",
         name: "",
         age: "",
         phone: "",

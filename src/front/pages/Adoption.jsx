@@ -19,6 +19,7 @@ export const Adoption = () => {
     const { store, dispatch } = useGlobalReducer();
 
     const [form, setForm] = useState({
+        formType: "adoption",
         name: "",
         age: "",
         phone: "",
