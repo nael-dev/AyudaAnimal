@@ -278,7 +278,7 @@ def create_checkout_session():
 @api.route("/send-email", methods=["POST"])
 def send_email():
     data = request.get_json()
-    form_type = data.get("formType")
+    form_type = data.get("form_type")
 
     # Configuración SMTP
     smtp_server = "smtp.gmail.com"
