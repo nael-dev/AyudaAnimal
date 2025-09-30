@@ -14,7 +14,8 @@ from flask_cors import CORS
 load_dotenv()
 
 # Carpeta del frontend construido con Vite
-static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../dist/')
+static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dist')
+
 
 app = Flask(__name__, static_folder=static_file_dir)
 jwt = JWTManager(app)
