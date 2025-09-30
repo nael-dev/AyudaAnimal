@@ -338,7 +338,7 @@ def send_email():
             aloneInHome = data.get("aloneInHome")
             why = data.get("why")
 
-            msg['Subject'] = f"Nuevo formulario de acogida de {name}"
+            msg['Subject'] = f"Nuevo formulario de adopción de {name}"
             body = f"""
             Nombre: {name}
             Edad: {age}
