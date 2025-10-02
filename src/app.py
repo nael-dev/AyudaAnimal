@@ -17,6 +17,7 @@ load_dotenv()
 static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../dist')
 
 
+
 app = Flask(__name__, static_folder=static_file_dir)
 jwt = JWTManager(app)
 app.url_map.strict_slashes = False
@@ -48,9 +49,8 @@ app.register_blueprint(api, url_prefix='/api')
 @app.route('/<path:path>')
 def serve(path):
     full_path = os.path.join(static_file_dir, path)
-    if path != "" and os.path.exists(full_path):
+    if path and os.path.exists(full_path):
         return send_from_directory(static_file_dir, path)
-    # Siempre retornar index.html para rutas SPA
     return send_from_directory(static_file_dir, 'index.html')
 
 
