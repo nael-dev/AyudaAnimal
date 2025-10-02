@@ -52,7 +52,7 @@ export const EditUserForm = () => {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
       console.log("Datos enviados:", form);
 
-      const response = await fetch(`${backendUrl}/api/editUser`, {
+      const response = await fetch(`/api/editUser`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

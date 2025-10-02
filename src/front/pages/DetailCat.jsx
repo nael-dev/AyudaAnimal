@@ -29,7 +29,7 @@ export const DetailCat = () => {
         try {
             const backendUrl = import.meta.env.VITE_BACKEND_URL
             if (!backendUrl) throw new Error('Backend error')
-            const response = await fetch(`${backendUrl}/api/payment-registration`, {
+            const response = await fetch(`/api/payment-registration`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ export const DetailCat = () => {
                 setError(null);
                 const backendUrl = import.meta.env.VITE_BACKEND_URL
                 if (!backendUrl) throw new Error('Backend error')
-                const response = await fetch(`${backendUrl}/api/cat/${cat_id}`, {
+                const response = await fetch(`/api/cat/${cat_id}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'

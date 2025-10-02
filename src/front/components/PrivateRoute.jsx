@@ -20,7 +20,7 @@ export const PrivarteRoute  = ({children}) => {
                 navigate('/login')
             }
 		
-            const userResponse  = await fetch (`${backendUrl}/api/user/user-data`,{
+            const userResponse  = await fetch (`/api/user/user-data`,{
                 headers:{
                     'Content-type': 'application/json',
                     'Authorization': `Bearer ${token}`

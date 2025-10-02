@@ -35,7 +35,7 @@ export const Login = () => {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
       if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined");
 
-      const response = await fetch(`${backendUrl}/api/login`, {
+      const response = await fetch(`/api/login`, {
         method: 'POST',
         headers: { 'Content-type': 'application/json' },
         body: JSON.stringify({ email, password })

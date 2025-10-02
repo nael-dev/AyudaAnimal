@@ -43,7 +43,7 @@ export const Adoption = () => {
         e.preventDefault();
         try {
             const resp = await fetch(
-                import.meta.env.VITE_BACKEND_URL + "/api/send-email",
+                `/api/send-email`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

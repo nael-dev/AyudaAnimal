@@ -20,7 +20,7 @@ export const Acogida = () => {
     const { store, dispatch } = useGlobalReducer();
 
     const [form, setForm] = useState({
-        formType: "acogida",
+        form_type: "acogida",
         name: "",
         age: "",
         phone: "",
@@ -43,7 +43,7 @@ export const Acogida = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const resp = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/send-email`, {
+            const resp = await fetch(`/api/send-email`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(form),
@@ -58,7 +58,7 @@ export const Acogida = () => {
     const handleGetCats = async () => {
         try {
             const backendUrl = import.meta.env.VITE_BACKEND_URL;
-            const response = await fetch(`${backendUrl}/api/cat`);
+            const response = await fetch(`/api/cat`);
             if (!response.ok) throw new Error("Error al cargar gatos");
             const data = await response.json();
             setCats(data.cats);
@@ -70,7 +70,7 @@ export const Acogida = () => {
     const handlePostSponsor = async (catId) => {
         try {
             const backendUrl = import.meta.env.VITE_BACKEND_URL;
-            await fetch(`${backendUrl}/api/payment-registration`, {
+            await fetch(`/api/payment-registration`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

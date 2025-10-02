@@ -19,7 +19,7 @@ export const Admin = () => {
         try {
             const backendUrl = import.meta.env.VITE_BACKEND_URL
             if (!backendUrl) throw new Error('Backend error')
-            const response = await fetch(`${backendUrl}/api/cat`, {
+            const response = await fetch(`/api/cat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

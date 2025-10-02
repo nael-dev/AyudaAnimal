@@ -29,7 +29,7 @@ export const Home = () => {
   const handlePostSponsor = async (catId) => {
     try {
       const backendUrl = import.meta.env.VITE_BACKEND_URL;
-      await fetch(`${backendUrl}/api/payment-registration`, {
+      await fetch(`/api/payment-registration`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +60,7 @@ export const Home = () => {
     const fetchUser = async () => {
       try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL;
-        const res = await fetch(`${backendUrl}/api/user/user-data`, {
+        const res = await fetch(`/api/user/user-data`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("No se pudo recuperar el usuario");
@@ -83,7 +83,7 @@ export const Home = () => {
       try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL;
         if (!backendUrl) throw new Error("Backend error");
-        const response = await fetch(`${backendUrl}/api/cat`, {
+        const response = await fetch(`/api/cat`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });

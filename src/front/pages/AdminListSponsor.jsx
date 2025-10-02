@@ -19,7 +19,7 @@ export const AdminListSponsor = () => {
             const backendUrl = import.meta.env.VITE_BACKEND_URL
             if (!backendUrl) throw new Error('Backend error')
 
-            const response = await fetch(`${backendUrl}/api/payment-registration-admin`,
+            const response = await fetch(`/api/payment-registration-admin`,
 
                 {
                     headers: {

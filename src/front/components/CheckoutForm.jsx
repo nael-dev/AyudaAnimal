@@ -22,7 +22,7 @@ export const CheckoutForm = ({ amount, setAmount, currency, setCurrency, onPayme
                 const backendUrl = import.meta.env.VITE_BACKEND_URL;
                 if (!backendUrl) throw new Error("Backend URL no definida");
 
-                const res = await fetch(`${backendUrl}/api/create-checkout-session`, {
+                const res = await fetch(`/api/create-checkout-session`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ amount: parseInt(amount) * 100, currency }),
