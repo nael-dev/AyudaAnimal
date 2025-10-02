@@ -3,8 +3,9 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: './',  // Esto hace que todos los assets se busquen relativos al HTML
+  base: '/assets/',        // Rutas absolutas en producción
   build: {
-    outDir: '../dist', // Mismo folder que Flask sirve
+    outDir: 'dist',        // Genera dist/assets/
+    emptyOutDir: true
   }
 })
