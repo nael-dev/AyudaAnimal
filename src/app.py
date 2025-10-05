@@ -45,13 +45,15 @@ setup_commands(app)
 app.register_blueprint(api, url_prefix='/api')
 
 # ---- Servir frontend ----
+# ---- Servir frontend ----
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    full_path = os.path.join(static_file_dir, path)
-    if path and os.path.exists(full_path):
-        return send_from_directory(static_file_dir, path)
-    return send_from_directory(static_file_dir, 'index.html')
+    full_path = os.path.join(app.static_folder, path)
+    if path != "" and os.path.exists(full_path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 
 # ---- Manejo de errores ----

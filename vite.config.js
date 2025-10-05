@@ -3,9 +3,8 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/assets/',        // Rutas absolutas en producción
+  base: '/',      // ✅ rutas absolutas (no ./)
   build: {
-    outDir: 'dist',        // Genera dist/assets/
-    emptyOutDir: true
+    outDir: 'dist'  // ✅ Vite genera los assets dentro de dist/
   }
 })
