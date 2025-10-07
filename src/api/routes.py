@@ -396,7 +396,7 @@ def send_email():
         # Construir payload para Resend
         payload = {
             "from": f"Payudan Animal <onboarding@resend.dev>",
-            "to": ["anadiazpa@gmail.com"],  # 📩 cámbialo por el correo donde quieras recibir los formularios
+            "to": ["naeldiaz@proton.me"],  # 📩 cámbialo por el correo donde quieras recibir los formularios
             "subject": subject,
             "text": body
         }
@@ -418,6 +418,6 @@ def send_email():
                 "error": f"Resend devolvió {response.status_code}",
                 "details": response.text
             }), 500
-
+        
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
