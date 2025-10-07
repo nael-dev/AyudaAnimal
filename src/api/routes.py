@@ -353,20 +353,19 @@ def send_email():
     data = request.get_json()
     form_type = data.get("form_type")
 
-    # Revisa que exista la API key
     resend_api_key = os.getenv("RESEND_API_KEY")
     if not resend_api_key:
         return jsonify({"success": False, "error": "Falta RESEND_API_KEY en las variables de entorno"}), 500
 
-    # Arma el cuerpo del correo
     try:
         if form_type not in ["acogida", "adoption"]:
             return jsonify({"success": False, "error": "Tipo de formulario no válido"}), 400
 
+        # Datos del formulario
         name = data.get("name")
-        email = data.get("email")
         age = data.get("age")
         phone = data.get("phone")
+        email = data.get("email")
         city = data.get("city")
         dwelling = data.get("dwelling")
         access = data.get("access")
@@ -376,27 +375,28 @@ def send_email():
         aloneInHome = data.get("aloneInHome")
         why = data.get("why")
 
-        subject = f"Nuevo formulario de {'acogida' if form_type == 'acogida' else 'adopción'} de {name}"
-
+        subject = f"Nuevo formulario de {'acogida' if form_type=='acogida' else 'adopción'} de {name}"
         body = f"""
-        Nombre: {name}
-        Edad: {age}
-        Teléfono: {phone}
-        Email: {email}
-        Ciudad: {city}
-        Vivienda: {dwelling}
-        Acceso: {access}
-        Compañía: {company}
-        Niños: {child}
-        Otros animales: {otherAnimals}
-        Solo en casa: {aloneInHome}
-        Motivo: {why}
-        """
+Nombre: {name}
+Edad: {age}
+Teléfono: {phone}
+Email: {email}
+Ciudad: {city}
+Vivienda: {dwelling}
+Acceso: {access}
+Compañía: {company}
+Niños: {child}
+Otros animales: {otherAnimals}
+Solo en casa: {aloneInHome}
+Motivo: {why}
+"""
 
-        # Construir payload para Resend
+        # Solo enviamos a tu correo de testing
+        my_email = "anadiazpa@gmail.com"
+
         payload = {
-            "from": f"Payudan Animal <naeldiaz@proton.me>",
-            "to": ["naeldiaz@proton.me"],  # 📩 cámbialo por el correo donde quieras recibir los formularios
+            "from": my_email,
+            "to": [my_email],
             "subject": subject,
             "text": body
         }
@@ -410,7 +410,11 @@ def send_email():
             json=payload
         )
 
-        if response.status_code == 200:
+        # Imprimir respuesta completa de Resend para debug
+        print("Resend response status:", response.status_code)
+        print("Resend response body:", response.text)
+
+        if response.status_code in [200, 202]:
             return jsonify({"success": True, "message": "Correo enviado correctamente"}), 200
         else:
             return jsonify({
@@ -418,6 +422,6 @@ def send_email():
                 "error": f"Resend devolvió {response.status_code}",
                 "details": response.text
             }), 500
-        
+
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
