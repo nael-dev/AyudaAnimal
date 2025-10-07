@@ -254,6 +254,59 @@ def create_payment():
         sponsor_id=sponsor.id, amount=amount, date_payment=date_payment)
     db.session.add(payment)
 
+@api.route('/payment-registration', methods=['GET'])
+@jwt_required()
+def payment_with_sponsor():
+    current_user_id = get_jwt_identity()
+    all_payments = (db.session.query(PaymentRegistration) .join(Sponsor).filter(Sponsor.user_id == int(current_user_id)).all()
+                    )
+
+    results = []
+    for payment in all_payments:
+        sponsor = payment.sponsor
+        user = sponsor.user_sponsor
+        cat = sponsor.cat
+        results.append({
+            'id': payment.id,
+            'amount': payment.amount,
+            'date_payment': str(payment.date_payment),
+            'sponsor': {
+                'id': sponsor.id,
+                'cat_id': sponsor.cat_id,
+                'cat_name': cat.name if cat else None,
+                'user_id': sponsor.user_id,
+                'user_email': user.email if user else None
+            }
+        })
+    return jsonify({"payments": results}), 201
+
+
+@api.route('/payment-registration-admin', methods=['GET'])
+@jwt_required()
+def payment_with_sponsor_admin():
+    all_payments = (db.session.query(PaymentRegistration).all()
+                    )
+    results = []
+    for payment in all_payments:
+        sponsor = payment.sponsor
+        user = sponsor.user_sponsor
+        cat = sponsor.cat
+
+        results.append({
+            'id': payment.id,
+            'amount': payment.amount,
+            'date_payment': str(payment.date_payment),
+            'sponsor': {
+                'id': sponsor.id,
+                'cat_id': sponsor.cat_id,
+                'cat_name': cat.name if cat else None,
+                'user_id': sponsor.user_id,
+                'user_email': user.email if user else None
+            }
+        })
+
+    return jsonify({"payments": results}), 200
+
 # -------------------- checkout session --------------------
 stripe.api_key = 'sk_test_51RahuCFMs8PtSpw5R8ZDgpeE3cGPxARTavpjBSoP2YJJGvyYEUOEHF9J0QgrbVQHyTv9K86mZETEuKJHZODPQOuT00mb5wz0An'
 @api.route('/create-checkout-session', methods=['POST'])
