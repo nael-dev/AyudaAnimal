@@ -395,7 +395,7 @@ Motivo: {why}
         my_email = "anadiazpa@gmail.com"
 
         payload = {
-            "from": my_email,
+            "from": "Testing <testing@resend.dev>",
             "to": [my_email],
             "subject": subject,
             "text": body
