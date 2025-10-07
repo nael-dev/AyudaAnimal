@@ -230,29 +230,48 @@ def get_all_sponsor():
 @api.route('/payment-registration', methods=['POST'])
 @jwt_required()
 def create_payment():
-    body = request.get_json()
-    current_user_id = get_jwt_identity()
-    if "cat_id" not in body or "amount" not in body or "date_payment" not in body:
-        return jsonify({'err': 'Bad request'}), 400
+    try:
+        body = request.get_json()
+        current_user_id = get_jwt_identity()
 
-    cat_id = body['cat_id']
-    amount = body['amount']
-    date_payment = body['date_payment']
+        if "cat_id" not in body or "amount" not in body or "date_payment" not in body:
+            return jsonify({'err': 'Bad request'}), 400
 
-    sponsor = db.session.execute(
-        select(Sponsor).where(
-            Sponsor.user_id == current_user_id,
-            Sponsor.cat_id == cat_id
+        cat_id = body['cat_id']
+        amount = body['amount']
+        date_payment = body['date_payment']
+
+        sponsor = db.session.execute(
+            select(Sponsor).where(
+                Sponsor.user_id == current_user_id,
+                Sponsor.cat_id == cat_id
+            )
+        ).scalar_one_or_none()
+
+        if sponsor is None:
+            sponsor = Sponsor(user_id=current_user_id, cat_id=cat_id)
+            db.session.add(sponsor)
+            db.session.commit()
+
+        payment = PaymentRegistration(
+            sponsor_id=sponsor.id,
+            amount=amount,
+            date_payment=date_payment
         )
-    ).scalar_one_or_none()
-    if sponsor is None:
-        sponsor = Sponsor(user_id=current_user_id, cat_id=cat_id)
-        db.session.add(sponsor)
+
+        db.session.add(payment)
         db.session.commit()
 
-    payment = PaymentRegistration(
-        sponsor_id=sponsor.id, amount=amount, date_payment=date_payment)
-    db.session.add(payment)
+        return jsonify({
+            "msg": "Pago registrado correctamente",
+            "payment": payment.serialize()
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error en create_payment:", e)  
+        return jsonify({"error": str(e)}), 500
+
 
 @api.route('/payment-registration', methods=['GET'])
 @jwt_required()
