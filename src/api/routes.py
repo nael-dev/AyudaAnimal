@@ -395,7 +395,7 @@ def send_email():
 
         # Construir payload para Resend
         payload = {
-            "from": f"Payudan Animal <onboarding@resend.dev>",
+            "from": f"Payudan Animal <naeldiaz@proton.me>",
             "to": ["naeldiaz@proton.me"],  # 📩 cámbialo por el correo donde quieras recibir los formularios
             "subject": subject,
             "text": body
