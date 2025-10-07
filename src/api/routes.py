@@ -15,6 +15,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
+import requests
 
 ph = PasswordHasher()
 api = Blueprint('api', __name__)
@@ -352,94 +353,71 @@ def send_email():
     data = request.get_json()
     form_type = data.get("form_type")
 
-    # Configuración SMTP
-    smtp_server = "smtp.gmail.com"
-    smtp_port = 587
-    sender_email = os.getenv("EMAIL_USER")
-    sender_password = os.getenv("EMAIL_PASS")
+    # Revisa que exista la API key
+    resend_api_key = os.getenv("RESEND_API_KEY")
+    if not resend_api_key:
+        return jsonify({"success": False, "error": "Falta RESEND_API_KEY en las variables de entorno"}), 500
 
+    # Arma el cuerpo del correo
     try:
-        msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = sender_email
-
-    
-        if form_type == "acogida":
-            name = data.get("name")
-            email = data.get("email")
-            age = data.get("age")
-            phone = data.get("phone")
-            city = data.get("city")
-            dwelling = data.get("dwelling")
-            access = data.get("access")
-            company = data.get("company")
-            child = data.get("child")
-            otherAnimals = data.get("otherAnimals")
-            aloneInHome = data.get("aloneInHome")
-            why = data.get("why")
-
-            msg['Subject'] = f"Nuevo formulario de acogida de {name}"
-            body = f"""
-            Nombre: {name}
-            Edad: {age}
-            Teléfono: {phone}
-            Email: {email}
-            Ciudad: {city}
-            Vivienda: {dwelling}
-            Acceso: {access}
-            Compañía: {company}
-            Niños: {child}
-            Otros animales: {otherAnimals}
-            Solo en casa: {aloneInHome}
-            Motivo: {why}
-            """
-
-       
-        elif form_type == "adoption":
-            
-            name = data.get("name")
-            email = data.get("email")
-            age = data.get("age")
-            phone = data.get("phone")
-            city = data.get("city")
-            dwelling = data.get("dwelling")
-            access = data.get("access")
-            company = data.get("company")
-            child = data.get("child")
-            otherAnimals = data.get("otherAnimals")
-            aloneInHome = data.get("aloneInHome")
-            why = data.get("why")
-
-            msg['Subject'] = f"Nuevo formulario de adopción de {name}"
-            body = f"""
-            Nombre: {name}
-            Edad: {age}
-            Teléfono: {phone}
-            Email: {email}
-            Ciudad: {city}
-            Vivienda: {dwelling}
-            Acceso: {access}
-            Compañía: {company}
-            Niños: {child}
-            Otros animales: {otherAnimals}
-            Solo en casa: {aloneInHome}
-            Motivo: {why}
-            """
-
-        else:
+        if form_type not in ["acogida", "adoption"]:
             return jsonify({"success": False, "error": "Tipo de formulario no válido"}), 400
 
-        # Adjuntar cuerpo al mensaje
-        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+        name = data.get("name")
+        email = data.get("email")
+        age = data.get("age")
+        phone = data.get("phone")
+        city = data.get("city")
+        dwelling = data.get("dwelling")
+        access = data.get("access")
+        company = data.get("company")
+        child = data.get("child")
+        otherAnimals = data.get("otherAnimals")
+        aloneInHome = data.get("aloneInHome")
+        why = data.get("why")
 
-        # Enviar correo
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, sender_email, msg.as_string())
-        server.quit()
+        subject = f"Nuevo formulario de {'acogida' if form_type == 'acogida' else 'adopción'} de {name}"
 
-        return jsonify({"success": True, "message": "Correo enviado"}), 200
+        body = f"""
+        Nombre: {name}
+        Edad: {age}
+        Teléfono: {phone}
+        Email: {email}
+        Ciudad: {city}
+        Vivienda: {dwelling}
+        Acceso: {access}
+        Compañía: {company}
+        Niños: {child}
+        Otros animales: {otherAnimals}
+        Solo en casa: {aloneInHome}
+        Motivo: {why}
+        """
+
+        # Construir payload para Resend
+        payload = {
+            "from": f"Payudan Animal <onboarding@resend.dev>",
+            "to": ["anadiazpa@gmail.com"],  # 📩 cámbialo por el correo donde quieras recibir los formularios
+            "subject": subject,
+            "text": body
+        }
+
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json"
+            },
+            json=payload
+        )
+
+        if response.status_code == 200:
+            return jsonify({"success": True, "message": "Correo enviado correctamente"}), 200
+        else:
+            return jsonify({
+                "success": False,
+                "error": f"Resend devolvió {response.status_code}",
+                "details": response.text
+            }), 500
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500

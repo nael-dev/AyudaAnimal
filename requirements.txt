@@ -26,3 +26,4 @@ cloudinary==1.30.0
 werkzeug==2.3.8
 wtforms==3.0.1
 stripe==8.5.0
+requests
