@@ -19,7 +19,7 @@ export const Adoption = () => {
     const { store, dispatch } = useGlobalReducer();
 
     const [form, setForm] = useState({
-        formType: "adoption",
+        form_type: "adoption",
         name: "",
         age: "",
         phone: "",
@@ -65,7 +65,7 @@ export const Adoption = () => {
         try {
             const backendUrl = import.meta.env.VITE_BACKEND_URL;
             if (!backendUrl) throw new Error("Backend error");
-            const response = await fetch(`${backendUrl}/api/cat`);
+            const response = await fetch(`/api/cat`);
             if (!response.ok) throw new Error("Error al cargar gatos");
             const data = await response.json();
             setCats(data.cats);
@@ -77,7 +77,7 @@ export const Adoption = () => {
     const handlePostSponsor = async (catId) => {
         try {
             const backendUrl = import.meta.env.VITE_BACKEND_URL;
-            await fetch(`${backendUrl}/api/payment-registration`, {
+            await fetch(`/api/payment-registration`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
