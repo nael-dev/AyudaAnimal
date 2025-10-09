@@ -20,11 +20,17 @@ export const Navbar = () => {
   const isLoggedIn = !!store.user || store.is_admin;
 
   let userDisplayName = "Invitado";
-  if (store.is_admin) {
-    userDisplayName = "Admin";
-  } else if (store.user) {
-    userDisplayName = "Área Personal";
+  if (store.is_admin) userDisplayName = "Admin";
+  else if (store.user) userDisplayName = "Área Personal";
+
+
+ const handleDropdownItemClick = () => {
+  const dropdownEl = document.querySelector('.dropdown-menu.show');
+  if (dropdownEl) {
+    const dropdownInstance = window.bootstrap.Dropdown.getInstance(dropdownEl);
+    if (dropdownInstance) dropdownInstance.hide();
   }
+};
 
   return (
     <nav className={`navbar navbar-expand-lg navbar-custom sticky-top ${darkMode ? "dark-mode" : ""}`}>
@@ -32,6 +38,7 @@ export const Navbar = () => {
         <Link className="navbar-brand d-flex align-items-center" to="/">
           <img src={logo} alt="Logo" className="logo spin-icon" />
         </Link>
+
         <button
           className="navbar-toggler border-0"
           type="button"
@@ -59,7 +66,7 @@ export const Navbar = () => {
                 Quiero apadrinar <LuPawPrint />
               </Link>
             </li>
-             <li className="nav-item">
+            <li className="nav-item">
               <Link className="nav-link nav-link-custom d-flex align-items-center gap-1" to="/acogida">
                 Quiero ser casa de acogida <LuPawPrint />
               </Link>
@@ -81,7 +88,7 @@ export const Navbar = () => {
             )}
           </ul>
 
-          <div className="d-flex align-items-center gap-3">
+          <div className="d-flex align-items-center gap-3 ms-auto pe-3 pe-md-0">
             <button
               onClick={() => setDarkMode(!darkMode)}
               className="btn btn-toggle-mode"
@@ -100,21 +107,28 @@ export const Navbar = () => {
                 {isLoggedIn ? <LuUser size={20} /> : <LuUserPlus size={20} />}
                 <span className="user-email">{userDisplayName}</span>
               </button>
-              <ul className={`dropdown-menu dropdown-menu-end dropdown-menu-custom`}>
+              <ul
+                className="dropdown-menu dropdown-menu-end dropdown-menu-custom"
+                style={{ minWidth: '200px' }}
+              >
                 {isLoggedIn ? (
                   <>
-                   <li>
-                       <Link className="dropdown-item" to="/edit-user">Perfil de usuario</Link>
+                    <li>
+                      <Link className="dropdown-item" to="/edit-user" onClick={handleDropdownItemClick}>
+                        Perfil de usuario
+                      </Link>
                     </li>
                     <li><hr className="dropdown-divider" /></li>
                     <li>
-                      <Link className="dropdown-item" to="/user-data">Mis Donaciones</Link>
+                      <Link className="dropdown-item" to="/user-data" onClick={handleDropdownItemClick}>
+                        Mis Donaciones
+                      </Link>
                     </li>
                     <li><hr className="dropdown-divider" /></li>
                     <li>
                       <button
                         className="dropdown-item text-danger d-flex align-items-center gap-2"
-                        onClick={handleLogout}
+                        onClick={() => { handleLogout(); handleDropdownItemClick(); }}
                       >
                         <LuLogOut size={18} /> Cerrar sesión
                       </button>
@@ -122,8 +136,9 @@ export const Navbar = () => {
                   </>
                 ) : (
                   <>
-                    <li><Link className="dropdown-item" to="/login">Iniciar sesión</Link></li>
-                    <li><Link className="dropdown-item" to="/form">Registrarme</Link></li>
+                    <li><Link className="dropdown-item" to="/login" onClick={handleDropdownItemClick}>Iniciar sesión</Link></li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li><Link className="dropdown-item" to="/form" onClick={handleDropdownItemClick}>Registrarme</Link></li>
                   </>
                 )}
               </ul>

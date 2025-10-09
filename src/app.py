@@ -10,6 +10,8 @@ from api.commands import setup_commands
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 
+
+
 # Cargar variables de entorno
 load_dotenv()
 

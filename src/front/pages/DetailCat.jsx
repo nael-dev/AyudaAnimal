@@ -136,8 +136,10 @@ export const DetailCat = () => {
                     <h3 className='text-center'><strong>Por favor inicia sesión  o registrate para donar.</strong></h3>
                 )}
             </div>
-             <div className='mt-5 px-5 ' style={{ width: 400, }} >
+             <div className='mt-4 mt-md-5 px-3 px-md-5 w-100 w-md-auto d-flex justify-content-center' >
+                <div style={{ maxWidth: 400, width: "100%" }}>
                 <ImageUploader  idImage={cat.image} />
+                </div>
             </div>
         </div>
        </div>
