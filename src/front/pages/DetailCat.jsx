@@ -91,57 +91,62 @@ export const DetailCat = () => {
 
     
     return (
-        <div style={{ backgroundImage:`url(${fotobackground})`, backgroundSize:"cover", backgroundPosition: "center" }}>
-        <div className="container d-flex py-5" >
-            <div className="text-start ms-4 " style={{ flex: 1 }}>
-                <h1 className='fw-bolder'>{cat.name}</h1>
-                <hr className="my-4" />
-                <h5 className="text-justify text fw-semibold">{cat.history}</h5>
-                <hr className="my-4" />
-                <h5 className="text-justify text fw-semibold card-title">Edad : {cat.age}</h5>
-                <hr className="my-4" />
-                <h5 className="text-justify text fw-semibold card-title">Raza : {cat.race}</h5>
-                <hr className="my-4" />
-                <h5 className="text-justify text fw-semibold card-title">Castración : {cat.castration ? 'SI': 'NO'}</h5>
-                <hr className="my-4" />
-                <h5 className="text-justify text fw-semibold card-title">Carácter : {cat.character}</h5>
-                <hr className="my-4" />
+       <div style={{ backgroundImage:`url(${fotobackground})`, backgroundSize:"cover", backgroundPosition: "center" }}>
+  <div className="container d-flex flex-column flex-md-row py-5">
+    
+    {/* Texto */}
+    <div className="text-start ms-0 ms-md-4 order-2 order-md-1" style={{ flex: 1 }}>
+      <h1 className='fw-bolder'>{cat.name}</h1>
+      <hr className="my-4" />
+      <h5 className="text-justify text fw-semibold">{cat.history}</h5>
+      <hr className="my-4" />
+      <h5 className="text-justify text fw-semibold card-title">Edad : {cat.age}</h5>
+      <hr className="my-4" />
+      <h5 className="text-justify text fw-semibold card-title">Raza : {cat.race}</h5>
+      <hr className="my-4" />
+      <h5 className="text-justify text fw-semibold card-title">Castración : {cat.castration ? 'SI': 'NO'}</h5>
+      <hr className="my-4" />
+      <h5 className="text-justify text fw-semibold card-title">Carácter : {cat.character}</h5>
+      <hr className="my-4" />
 
-
-                {isLoggedIn ? (
-                    <div className='d-flex justify-content-center'>
-                        <button  
-                        onClick={() => setMostrarPago(true)} 
-                        className='btn btn-primary-custom mt-3 w-100 d-grid gap-2 col-3 mx-auto' >
-                            Donar
-                        </button>
-                        <Modal show={mostrarPago} onHide={() => setMostrarPago(false)} centered>
-                            <Modal.Header closeButton>
-                                <Modal.Title>Donar</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                <Elements stripe={stripePromise}>
-                                    <CheckoutForm
-                                        amount={amount}
-                                        setAmount={setAmount}
-                                        currency={currency}
-                                        setCurrency={setCurrency}
-                                        onPaymentSuccess={handlePaymentSuccess}
-                                    />
-                                </Elements>
-                            </Modal.Body>
-                        </Modal>
-                    </div>
-                ) : (
-                    <h3 className='text-center'><strong>Por favor inicia sesión  o registrate para donar.</strong></h3>
-                )}
-            </div>
-             <div className='mt-4 mt-md-5 px-3 px-md-5 w-100 w-md-auto d-flex justify-content-center' >
-                <div style={{ maxWidth: 400, width: "100%" }}>
-                <ImageUploader  idImage={cat.image} />
-                </div>
-            </div>
+      {isLoggedIn ? (
+        <div className='d-flex justify-content-center'>
+          <button  
+            onClick={() => setMostrarPago(true)} 
+            className='btn btn-primary-custom mt-3 w-100 d-grid gap-2 col-3 mx-auto' >
+              Donar
+          </button>
+          <Modal show={mostrarPago} onHide={() => setMostrarPago(false)} centered>
+            <Modal.Header closeButton>
+              <Modal.Title>Donar</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Elements stripe={stripePromise}>
+                <CheckoutForm
+                  amount={amount}
+                  setAmount={setAmount}
+                  currency={currency}
+                  setCurrency={setCurrency}
+                  onPaymentSuccess={handlePaymentSuccess}
+                />
+              </Elements>
+            </Modal.Body>
+          </Modal>
         </div>
-       </div>
+      ) : (
+        <h3 className='text-center'><strong>Por favor inicia sesión  o registrate para donar.</strong></h3>
+      )}
+    </div>
+
+    {/* Imagen */}
+    <div className='mt-4 mt-md-0 px-0 px-md-5 w-100 w-md-auto d-flex justify-content-center order-1 order-md-2'>
+      <div style={{ maxWidth: 400, width: "100%" }}>
+        <ImageUploader  idImage={cat.image} />
+      </div>
+    </div>
+
+  </div>
+</div>
+
     );
 };
