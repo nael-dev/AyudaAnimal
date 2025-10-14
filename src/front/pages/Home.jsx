@@ -198,6 +198,53 @@ export const Home = () => {
           </Card>
         ))}
       />
+
+      <hr className="my-4 border-3 border-dark opacity-50" />
+<h1 className="fw-bold display-5" style={{ color: "black" }}>
+  Gatitos adoptados 🐾
+</h1>
+<Carousel
+  cards={cats
+    .filter((catItem) => catItem.adopted) // filtramos solo adoptados
+    .map((catItem) => (
+      <Card cat={catItem} key={catItem.id}>
+        {LoggedIn ? (
+          <>
+            <button
+              className="btn btn-primary-custom mt-3 w-100"
+              onClick={() => {
+                setSelectedCat(catItem);
+                setMostrarPago(true);
+              }}
+            >
+              Donar
+            </button>
+            <Modal show={mostrarPago} onHide={() => setMostrarPago(false)} centered>
+              <Modal.Header closeButton>
+                <Modal.Title>Donar {selectedCat ? selectedCat.name : ""}</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <Elements stripe={stripePromise}>
+                  <CheckoutForm
+                    amount={amount}
+                    setAmount={setAmount}
+                    currency={currency}
+                    setCurrency={setCurrency}
+                    onPaymentSuccess={handlePaymentSuccess}
+                  />
+                </Elements>
+              </Modal.Body>
+            </Modal>
+          </>
+        ) : (
+          <h6 className="text-center mt-3">
+            <strong>Por favor inicia sesión o regístrate para donar.</strong>
+          </h6>
+        )}
+      </Card>
+    ))}
+/>
+
       <hr className="my-4 border-3 border-dark opacity-50" />
       <h1 className="fw-bold display-5" style={{ color: "black" }}>
         Tips para cuidar de tu minino <MdOutlineTipsAndUpdates />

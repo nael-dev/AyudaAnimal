@@ -96,7 +96,6 @@ export const DetailCat = () => {
                     gap: "2rem",
                     width: "100%",
                     maxWidth: 900,
-                    backgroundColor: "rgba(255, 255, 255, 0.9)",
                     borderRadius: "12px",
                     padding: "2rem"
                 }}
