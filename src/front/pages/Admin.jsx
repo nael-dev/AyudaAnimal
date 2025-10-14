@@ -9,6 +9,7 @@ export const Admin = () => {
     const [age, setAge] = useState('');
     const [race, setRace] = useState('');
     const [castration, setCastration] = useState('');
+    const [adoption, setAdoption] = useState('');
     const [character, setCharacter] = useState('');
     const [image, setImage] = useState('');
     const [history, setHistory] = useState('');
@@ -29,7 +30,8 @@ export const Admin = () => {
                     castration,
                     character,
                     image,
-                    history
+                    history,
+                    adoption
                 })
             });
             const result = await response.json();
@@ -84,6 +86,11 @@ export const Admin = () => {
                         <label htmlFor="castration" className="form-label fw-semibold">¿Está castrado? </label>
                         <input type="checkbox" className="form-check-input" id="castration" onChange={(e) => setCastration(e.target.checked)} />
                     </div>
+                    <div className="mb-3">
+                        <label htmlFor="adoption" className="form-label fw-semibold">¿Está adoptado? </label>
+                        <input type="checkbox" className="form-check-input" id="adoption" onChange={(e) => setAdoption(e.target.checked)} />
+                    </div>
+
                     <div className="mb-3">
                         <label htmlFor="image" className="form-label fw-semibold">Imagen:</label>
                         <input type="text" className="form-control" id="image" onChange={(e) => setImage(e.target.value)} />

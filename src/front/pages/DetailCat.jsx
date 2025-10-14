@@ -82,9 +82,9 @@ export const DetailCat = () => {
 
                 {/* Imagen */}
                 <div className='order-1 order-md-2 mt-4 mt-md-0 px-3 px-md-5 d-flex justify-content-center'>
-                    <div style={{ width: "100%", maxWidth: 300 }}>
-                        <ImageUploader idImage={cat.image} />
-                    </div>
+                
+                        <ImageUploader idImage={cat.image}  className="img-fluid"/>
+                    
                 </div>
 
                 {/* Texto */}
