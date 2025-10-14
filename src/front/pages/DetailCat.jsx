@@ -77,18 +77,42 @@ export const DetailCat = () => {
     if (!cat) return null;
 
     return (
-        <div style={{ backgroundImage: `url(${fotobackground})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+        <div
+            style={{
+                backgroundImage: `url(${fotobackground})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                minHeight: "100vh",
+            }}
+        >
             <div className="container d-flex flex-column flex-md-row py-5 align-items-start">
 
                 {/* Imagen */}
                 <div className='order-1 order-md-2 mt-4 mt-md-0 px-3 px-md-5 d-flex justify-content-center'>
-                
-                        <ImageUploader idImage={cat.image}  className="img-fluid"/>
-                    
+                    <div
+                        style={{
+                            width: "100%",       // ocupa todo el ancho disponible
+                            maxWidth: 300,       // máximo 300px en escritorio
+                            aspectRatio: "1 / 1", // mantiene proporción cuadrada
+                            overflow: "hidden",   // evita que la imagen sobresalga
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}
+                    >
+                        <ImageUploader
+                            idImage={cat.image}
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover"  // mantiene proporción sin deformar
+                            }}
+                        />
+                    </div>
                 </div>
 
                 {/* Texto */}
-                <div className="text-start order-2 order-md-1" style={{ flex: 1, maxWidth: 600 }}>
+                <div className="text-start order-2 order-md-1 mt-4 mt-md-0" style={{ flex: 1, maxWidth: 600 }}>
                     <h1 className='fw-bolder'>{cat.name}</h1>
                     <hr className="my-4" />
                     <h5 className="text-justify text fw-semibold">{cat.history}</h5>
@@ -106,7 +130,8 @@ export const DetailCat = () => {
                         <div className='d-flex justify-content-center'>
                             <button
                                 onClick={() => setMostrarPago(true)}
-                                className='btn btn-primary-custom mt-3 w-100 d-grid gap-2 col-3 mx-auto' >
+                                className='btn btn-primary-custom mt-3 w-100 d-grid gap-2 col-3 mx-auto'
+                            >
                                 Donar
                             </button>
                             <Modal show={mostrarPago} onHide={() => setMostrarPago(false)} centered>
@@ -130,6 +155,7 @@ export const DetailCat = () => {
                         <h3 className='text-center'><strong>Por favor inicia sesión o registrate para donar.</strong></h3>
                     )}
                 </div>
+
             </div>
         </div>
     );
