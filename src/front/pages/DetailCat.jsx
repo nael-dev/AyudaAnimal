@@ -6,7 +6,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { Modal } from 'react-bootstrap';
 import fotobackground from '../assets/img/fotobackground.jpeg';
-import '../index.css'
+import '../index.css';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -24,8 +24,8 @@ export const DetailCat = () => {
 
     const handlePostSponsor = async () => {
         try {
-            const backendUrl = import.meta.env.VITE_BACKEND_URL
-            if (!backendUrl) throw new Error('Backend error')
+            const backendUrl = import.meta.env.VITE_BACKEND_URL;
+            if (!backendUrl) throw new Error('Backend error');
             await fetch(`/api/payment-registration`, {
                 method: 'POST',
                 headers: {
@@ -42,7 +42,7 @@ export const DetailCat = () => {
         } catch (error) {
             console.error('Error:', error);
         }
-    }
+    };
 
     const handlePaymentSuccess = () => {
         handlePostSponsor();
@@ -54,8 +54,8 @@ export const DetailCat = () => {
             try {
                 setCargando(true);
                 setError(null);
-                const backendUrl = import.meta.env.VITE_BACKEND_URL
-                if (!backendUrl) throw new Error('Backend error')
+                const backendUrl = import.meta.env.VITE_BACKEND_URL;
+                if (!backendUrl) throw new Error('Backend error');
                 const response = await fetch(`/api/cat/${cat_id}`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' }
@@ -83,80 +83,100 @@ export const DetailCat = () => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 minHeight: "100vh",
+                padding: "2rem 1rem",
+                display: "flex",
+                justifyContent: "center"
             }}
         >
-            <div className="container d-flex flex-column flex-md-row py-5 align-items-start">
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "2rem",
+                    width: "100%",
+                    maxWidth: 900,
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    borderRadius: "12px",
+                    padding: "2rem"
+                }}
+            >
+                {/* Texto */}
+                <div style={{ width: "100%", textAlign: "center" }}>
+                    <h1 className="fw-bolder">{cat.name}</h1>
+                    <hr className="my-4" />
+                    <p className="text-justify">{cat.history}</p>
+                    <hr className="my-4" />
+                    <p><strong>Edad:</strong> {cat.age}</p>
+                    <p><strong>Raza:</strong> {cat.race}</p>
+                    <p><strong>Castración:</strong> {cat.castration ? 'SI' : 'NO'}</p>
+                    <p><strong>Carácter:</strong> {cat.character}</p>
+                </div>
 
                 {/* Imagen */}
-                <div className='order-1 order-md-2 mt-4 mt-md-0 px-3 px-md-5 d-flex justify-content-center'>
-                    <div
+                <div
+                    style={{
+                        width: "90%",
+                        maxWidth: 300,
+                        aspectRatio: "1 / 1",
+                        overflow: "hidden",
+                        borderRadius: "12px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
+                >
+                    <ImageUploader
+                        idImage={cat.image}
                         style={{
-                            width: "100%",       // ocupa todo el ancho disponible
-                            maxWidth: 300,       // máximo 300px en escritorio
-                            aspectRatio: "1 / 1", // mantiene proporción cuadrada
-                            overflow: "hidden",   // evita que la imagen sobresalga
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center"
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover"
                         }}
-                    >
-                        <ImageUploader
-                            idImage={cat.image}
+                    />
+                </div>
+
+                {/* Botón de donación */}
+                {isLoggedIn ? (
+                    <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+                        <button
+                            onClick={() => setMostrarPago(true)}
                             style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover"  // mantiene proporción sin deformar
+                                padding: "0.75rem 1.5rem",
+                                fontSize: "1rem",
+                                borderRadius: "8px",
+                                border: "none",
+                                backgroundColor: "#007bff",
+                                color: "#fff",
+                                cursor: "pointer"
                             }}
-                        />
+                        >
+                            Donar
+                        </button>
+                        <Modal show={mostrarPago} onHide={() => setMostrarPago(false)} centered>
+                            <Modal.Header closeButton>
+                                <Modal.Title>Donar</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                                <Elements stripe={stripePromise}>
+                                    <CheckoutForm
+                                        amount={amount}
+                                        setAmount={setAmount}
+                                        currency={currency}
+                                        setCurrency={setCurrency}
+                                        onPaymentSuccess={handlePaymentSuccess}
+                                    />
+                                </Elements>
+                            </Modal.Body>
+                        </Modal>
                     </div>
-                </div>
-
-                {/* Texto */}
-                <div className="text-start order-2 order-md-1 mt-4 mt-md-0" style={{ flex: 1, maxWidth: 600 }}>
-                    <h1 className='fw-bolder'>{cat.name}</h1>
-                    <hr className="my-4" />
-                    <h5 className="text-justify text fw-semibold">{cat.history}</h5>
-                    <hr className="my-4" />
-                    <h5 className="text-justify text fw-semibold card-title">Edad : {cat.age}</h5>
-                    <hr className="my-4" />
-                    <h5 className="text-justify text fw-semibold card-title">Raza : {cat.race}</h5>
-                    <hr className="my-4" />
-                    <h5 className="text-justify text fw-semibold card-title">Castración : {cat.castration ? 'SI' : 'NO'}</h5>
-                    <hr className="my-4" />
-                    <h5 className="text-justify text fw-semibold card-title">Carácter : {cat.character}</h5>
-                    <hr className="my-4" />
-
-                    {isLoggedIn ? (
-                        <div className='d-flex justify-content-center'>
-                            <button
-                                onClick={() => setMostrarPago(true)}
-                                className='btn btn-primary-custom mt-3 w-100 d-grid gap-2 col-3 mx-auto'
-                            >
-                                Donar
-                            </button>
-                            <Modal show={mostrarPago} onHide={() => setMostrarPago(false)} centered>
-                                <Modal.Header closeButton>
-                                    <Modal.Title>Donar</Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
-                                    <Elements stripe={stripePromise}>
-                                        <CheckoutForm
-                                            amount={amount}
-                                            setAmount={setAmount}
-                                            currency={currency}
-                                            setCurrency={setCurrency}
-                                            onPaymentSuccess={handlePaymentSuccess}
-                                        />
-                                    </Elements>
-                                </Modal.Body>
-                            </Modal>
-                        </div>
-                    ) : (
-                        <h3 className='text-center'><strong>Por favor inicia sesión o registrate para donar.</strong></h3>
-                    )}
-                </div>
-
+                ) : (
+                    <h3 className="text-center mt-3">
+                        <strong>Por favor inicia sesión o registrate para donar.</strong>
+                    </h3>
+                )}
             </div>
         </div>
     );
 };
+
