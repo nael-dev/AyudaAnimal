@@ -79,6 +79,8 @@ class Cat(db.Model):
     character:Mapped[str] = mapped_column (String(120),nullable= False)
     image: Mapped[str] = mapped_column (String(400), nullable= False)
     history: Mapped[str] = mapped_column (String(600), nullable= False)
+    adopted: Mapped[bool] = mapped_column(default=False, nullable=False)
+
 
     sponsor_cat: Mapped[List["Sponsor"]] = relationship(back_populates="cat")
 
@@ -91,7 +93,8 @@ class Cat(db.Model):
             "castration": self.castration,
             "character": self.character,
             "image" : self.image,
-            "history" : self.history
+            "history" : self.history,
+            "adopted" : self.adopted
         }
 
     

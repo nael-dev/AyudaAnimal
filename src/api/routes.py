@@ -130,6 +130,8 @@ def create_cat():
     body = request.get_json()
     required_fields = ['name', 'age', 'race',
                        'castration', 'character', 'image', 'history']
+    
+
     if not all(field in body for field in required_fields):
         return jsonify({'err': 'Bad request'}), 400
 
@@ -137,8 +139,20 @@ def create_cat():
     alredy_exist = db.session.execute(search_exist).scalar_one_or_none()
     if alredy_exist:
         return jsonify({'err': 'The cat already exists'}), 409
+    
+    adopted_value = body.get('adopted', False)  # por defecto será False
 
-    cat = Cat(**{field: body[field] for field in required_fields})
+    cat = Cat(
+        name=body['name'],
+        age=body['age'],
+        race=body['race'],
+        castration=body['castration'],
+        character=body['character'],
+        image=body['image'],
+        history=body['history'],
+        adopted=adopted_value  # 👈 añadimos el campo aquí
+    )
+
     db.session.add(cat)
     db.session.commit()
     return jsonify({'ok': 'Cat added'}), 201
@@ -146,6 +160,13 @@ def create_cat():
 
 @api.route('/cat', methods=['GET'])
 def get_all_cat():
+    adopted_param = request.args.get('adopted')  # puede ser 'true', 'false' o None
+
+    query = select(Cat)
+    if adopted_param is not None:
+        is_adopted = adopted_param.lower() == 'true'
+        query = query.where(Cat.adopted == is_adopted)
+
     all_cats = db.session.execute(select(Cat)).scalars().all()
     return jsonify({"cats": [cat.serialize() for cat in all_cats]}), 200
 
@@ -204,6 +225,23 @@ def handle_delete_cat(cat_id):
     except exc.IntegrityError:
         db.session.rollback()
         return jsonify({"error": "Cannot delete Cat: it is referenced by other records"})
+    
+@api.route('/cat/<int:cat_id>/adopt', methods=['PATCH'])
+def adopt_cat(cat_id):
+    cat = db.session.get(Cat, cat_id)
+    if not cat:
+        return jsonify({'error': 'Cat not found'}), 404
+
+    data = request.get_json() or {}
+
+    # Por defecto marcamos como adoptado, pero puede venir adoptado=false si se desea revertir
+    adopted_value = data.get('adopted', True)
+
+    cat.adopted = bool(adopted_value)
+    db.session.commit()
+
+    status = "adopted" if cat.adopted else "available"
+    return jsonify({'success': True, 'message': f"Cat {cat.name} is now {status}", 'cat': cat.serialize()}), 200
 
 # -------------------- Sponsors --------------------
 
