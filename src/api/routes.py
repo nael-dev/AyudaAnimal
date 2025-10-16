@@ -1,6 +1,7 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
+from flask import Flask, request, jsonify
 from flask import Flask, request, jsonify, url_for, Blueprint, redirect
 from api.models import db, User, Cat, Sponsor, PaymentRegistration
 from api.utils import generate_sitemap, APIException
@@ -130,7 +131,6 @@ def create_cat():
     body = request.get_json()
     required_fields = ['name', 'age', 'race',
                        'castration', 'character', 'image', 'history']
-    
 
     if not all(field in body for field in required_fields):
         return jsonify({'err': 'Bad request'}), 400
@@ -139,7 +139,7 @@ def create_cat():
     alredy_exist = db.session.execute(search_exist).scalar_one_or_none()
     if alredy_exist:
         return jsonify({'err': 'The cat already exists'}), 409
-    
+
     adopted_value = body.get('adopted', False)  # por defecto será False
 
     cat = Cat(
@@ -160,7 +160,8 @@ def create_cat():
 
 @api.route('/cat', methods=['GET'])
 def get_all_cat():
-    adopted_param = request.args.get('adopted')  # puede ser 'true', 'false' o None
+    # puede ser 'true', 'false' o None
+    adopted_param = request.args.get('adopted')
 
     query = select(Cat)
     if adopted_param is not None:
@@ -225,7 +226,8 @@ def handle_delete_cat(cat_id):
     except exc.IntegrityError:
         db.session.rollback()
         return jsonify({"error": "Cannot delete Cat: it is referenced by other records"})
-    
+
+
 @api.route('/cat/<int:cat_id>/adopt', methods=['PATCH'])
 def adopt_cat(cat_id):
     cat = db.session.get(Cat, cat_id)
@@ -308,7 +310,7 @@ def create_payment():
 
     except Exception as e:
         db.session.rollback()
-        print("Error en create_payment:", e)  
+        print("Error en create_payment:", e)
         return jsonify({"error": str(e)}), 500
 
 
@@ -365,8 +367,11 @@ def payment_with_sponsor_admin():
 
     return jsonify({"payments": results}), 200
 
+
 # -------------------- checkout session --------------------
 stripe.api_key = 'sk_test_51RahuCFMs8PtSpw5R8ZDgpeE3cGPxARTavpjBSoP2YJJGvyYEUOEHF9J0QgrbVQHyTv9K86mZETEuKJHZODPQOuT00mb5wz0An'
+
+
 @api.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
     try:
@@ -385,14 +390,7 @@ def create_checkout_session():
         return jsonify({'error': str(e)}), 400
 
 # -------------------- Email formularios --------------------
-
-from flask import Flask, request, jsonify
-import os
-import requests
-
-app = Flask(__name__)
-
-@app.route("/send-email", methods=["POST"])
+@api.route("/send-email", methods=["POST"])
 def send_email():
     data = request.get_json()
     form_type = data.get("form_type")
@@ -434,7 +432,7 @@ Por favor confirma tu correo haciendo clic en el siguiente enlace:
 
             name = data.get("name")
             email = data.get("email")
-            subject = f"Nuevo formulario de {'acogida' if form_type=='acogida' else 'adopción'} de {name}"
+            subject = f"Nuevo formulario de {'acogida' if form_type == 'acogida' else 'adopción'} de {name}"
             body = f"""
 Nombre: {name}
 Edad: {data.get('age')}
@@ -457,7 +455,7 @@ Motivo: {data.get('why')}
 
         # ----- ENVÍO DEL CORREO -----
         payload = {
-            "from": "No Reply <no-reply@tusitio.com>",
+            "from": "Testing <testing@resend.dev>",
             "to": [to_email],
             "subject": subject,
             "text": body
