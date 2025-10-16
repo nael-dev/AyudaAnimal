@@ -386,7 +386,13 @@ def create_checkout_session():
 
 # -------------------- Email formularios --------------------
 
-@api.route("/send-email", methods=["POST"])
+from flask import Flask, request, jsonify
+import os
+import requests
+
+app = Flask(__name__)
+
+@app.route("/send-email", methods=["POST"])
 def send_email():
     data = request.get_json()
     form_type = data.get("form_type")
@@ -396,45 +402,63 @@ def send_email():
         return jsonify({"success": False, "error": "Falta RESEND_API_KEY en las variables de entorno"}), 500
 
     try:
-        if form_type not in ["acogida", "adoption"]:
+        # ----- CORREO DE BIENVENIDA -----
+        if form_type == "welcome":
+            name = data.get("name", "Usuario")
+            email = data.get("email")
+            verification_link = data.get("verification_link", "#")
+
+            if not email:
+                return jsonify({"success": False, "error": "Falta email para enviar el correo de bienvenida"}), 400
+
+            subject = f"¡Bienvenido a Nuestra App, {name}!"
+            body = f"""
+Hola {name}!
+
+Gracias por registrarte en nuestra plataforma 🐾.
+Por favor confirma tu correo haciendo clic en el siguiente enlace:
+
+{verification_link}
+
+¡Esperamos que disfrutes de la experiencia!
+"""
+            to_email = email
+
+        # ----- FORMULARIO DE ACOGIDA O ADOPCIÓN -----
+        elif form_type in ["acogida", "adoption"]:
+            required_fields = ["name", "age", "phone", "email", "city", "dwelling",
+                               "access", "company", "child", "otherAnimals", "aloneInHome", "why"]
+            missing_fields = [f for f in required_fields if f not in data]
+            if missing_fields:
+                return jsonify({"success": False, "error": f"Faltan campos: {', '.join(missing_fields)}"}), 400
+
+            name = data.get("name")
+            email = data.get("email")
+            subject = f"Nuevo formulario de {'acogida' if form_type=='acogida' else 'adopción'} de {name}"
+            body = f"""
+Nombre: {name}
+Edad: {data.get('age')}
+Teléfono: {data.get('phone')}
+Email: {email}
+Ciudad: {data.get('city')}
+Vivienda: {data.get('dwelling')}
+Acceso: {data.get('access')}
+Compañía: {data.get('company')}
+Niños: {data.get('child')}
+Otros animales: {data.get('otherAnimals')}
+Solo en casa: {data.get('aloneInHome')}
+Motivo: {data.get('why')}
+"""
+            # Envía a correo de testing o equipo
+            to_email = "anadiazpa@gmail.com"
+
+        else:
             return jsonify({"success": False, "error": "Tipo de formulario no válido"}), 400
 
-        # Datos del formulario
-        name = data.get("name")
-        age = data.get("age")
-        phone = data.get("phone")
-        email = data.get("email")
-        city = data.get("city")
-        dwelling = data.get("dwelling")
-        access = data.get("access")
-        company = data.get("company")
-        child = data.get("child")
-        otherAnimals = data.get("otherAnimals")
-        aloneInHome = data.get("aloneInHome")
-        why = data.get("why")
-
-        subject = f"Nuevo formulario de {'acogida' if form_type=='acogida' else 'adopción'} de {name}"
-        body = f"""
-Nombre: {name}
-Edad: {age}
-Teléfono: {phone}
-Email: {email}
-Ciudad: {city}
-Vivienda: {dwelling}
-Acceso: {access}
-Compañía: {company}
-Niños: {child}
-Otros animales: {otherAnimals}
-Solo en casa: {aloneInHome}
-Motivo: {why}
-"""
-
-        # Solo enviamos a tu correo de testing
-        my_email = "anadiazpa@gmail.com"
-
+        # ----- ENVÍO DEL CORREO -----
         payload = {
-            "from": "Testing <testing@resend.dev>",
-            "to": [my_email],
+            "from": "No Reply <no-reply@tusitio.com>",
+            "to": [to_email],
             "subject": subject,
             "text": body
         }
@@ -448,7 +472,6 @@ Motivo: {why}
             json=payload
         )
 
-        # Imprimir respuesta completa de Resend para debug
         print("Resend response status:", response.status_code)
         print("Resend response body:", response.text)
 

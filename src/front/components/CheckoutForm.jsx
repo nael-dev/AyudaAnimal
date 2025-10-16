@@ -139,9 +139,15 @@ export const CheckoutForm = ({ amount, setAmount, currency, setCurrency, onPayme
                 <CardElement
                     options={{
                         style: {
-                            base: { fontSize: "16px", color: "#0d6efd", fontWeight: "600", "::placeholder": { color: "#a0b9ff" } },
+                            base: {
+                                fontSize: "16px",
+                                color: "#0d6efd",
+                                fontWeight: "600",
+                                "::placeholder": { color: "#a0b9ff" },
+                            },
                             invalid: { color: "#ff4d4f" },
                         },
+                        hidePostalCode: false, // mostrar código postal si lo quieres
                     }}
                 />
             </div>
