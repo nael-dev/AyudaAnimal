@@ -158,6 +158,7 @@ export const Form = () => {
                   }}
                   placeholder="Confirma tu contraseña"
                   required
+                  
                 />
                 <i className="fa-solid fa-lock"></i>
                 <span

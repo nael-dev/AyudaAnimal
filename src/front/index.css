@@ -475,3 +475,23 @@ body {
     margin-right: 0.5rem;  /* espacio desde el borde derecho */
   }
 }
+
+.input-box.position-relative {
+  position: relative;
+}
+
+.input-box input {
+  width: 100%;
+  padding-right: 2.5rem; /* deja espacio para el icono del ojo */
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;           /* separa un poco del borde */
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #555;
+  display: flex;
+  align-items: center;
+}
