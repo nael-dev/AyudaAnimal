@@ -77,13 +77,13 @@ export const Form = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             form_type: "welcome",
-            name: email.split("@")[0], // opcional, nombre del usuario
+            name: email.split("@")[0],
             email,
             verification_link: verificationLink,
           }),
         });
 
-        alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
+       
         navigate("/login");
       } else {
         setErrorMsg(signupData.error || "Error al crear usuario");
