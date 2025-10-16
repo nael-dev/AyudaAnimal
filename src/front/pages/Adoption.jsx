@@ -250,7 +250,9 @@ export const Adoption = () => {
             {/* Carrusel */}
             < div className="p-5" >
                 <Carousel
-                    cards={cats.map((catItem) => (
+                    cards={cats
+                        .filter((catItem) => !catItem.adopted)
+                        .map((catItem) => (
                         <Card cat={catItem} key={catItem.id}>
                             {LoggedIn ? (
                                 <>
