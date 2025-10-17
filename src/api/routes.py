@@ -17,6 +17,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 import requests
+import secrets
+from api.email import send_email_verification  
 
 ph = PasswordHasher()
 api = Blueprint('api', __name__)
@@ -31,6 +33,9 @@ CORS(api, resources={r"/*": {"origins": frontend_urls}})
 # -------------------- Usuarios --------------------
 
 
+
+ph = PasswordHasher()
+
 @api.route('/signup', methods=['POST'])
 def create_user():
     body = request.get_json()
@@ -38,20 +43,26 @@ def create_user():
     if not all(field in body for field in required_fields):
         return jsonify({'err': 'Bad request, missing email or password'}), 400
 
-    search_exist = select(User).where(User.email == body['email'])
-    already_exist = db.session.execute(search_exist).scalar_one_or_none()
-    if already_exist:
+    if User.query.filter_by(email=body['email']).first():
         return jsonify({"error": "User already exists"}), 409
 
-    try:
-        hashed_password = ph.hash(body['password'])
-    except Exception:
-        return jsonify({'error': 'Failed to hash password'}), 500
+    hashed_password = ph.hash(body['password'])
+    verification_token = secrets.token_urlsafe(32)
 
-    user = User(email=body['email'], password=hashed_password)
+    user = User(
+        email=body['email'],
+        password=hashed_password,
+        name=body.get("name"),
+        verification_token=verification_token
+    )
     db.session.add(user)
     db.session.commit()
-    return jsonify({'Ok': "User created"}), 201
+
+    # Enviar correo de verificación
+    send_email_verification(user.email, user.verification_token, user.name or "Usuario")
+
+    return jsonify({'Ok': "User created, verification email sent"}), 201
+
 
 
 @api.route('/login', methods=['POST'])
@@ -486,3 +497,17 @@ Motivo: {data.get('why')}
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+  # ----- VERIFICACION EMAIL -----
+@api.route('/verify-email/<token>', methods=['GET'])
+def verify_email(token):
+    user = User.query.filter_by(verification_token=token).first()
+    if not user:
+        return jsonify({"error": "Token inválido"}), 400
+
+    user.is_verified = True
+    user.verification_token = None  # eliminar token tras verificar
+    db.session.commit()
+
+    # Redirigir al login de tu web
+    return redirect("https://payudaanimaljerez.onrender.com/login")

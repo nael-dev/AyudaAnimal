@@ -57,6 +57,8 @@ class User(db.Model):
     name: Mapped[str] = mapped_column(String(120),nullable=True)
     lastname: Mapped[str] = mapped_column (String(120), nullable = True)
     birthdate: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    is_verified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(255), nullable=True)
 
     sponsor: Mapped[List["Sponsor"]] = relationship(back_populates="user_sponsor")
 
@@ -66,7 +68,8 @@ class User(db.Model):
             "email": self.email,
             "name": self.name,
             "lastname": self.lastname,
-            "birthdate": self.birthdate
+            "birthdate": self.birthdate,
+            "is_verified": self.is_verified
             # do not serialize the password, its a security breach
         }
     
