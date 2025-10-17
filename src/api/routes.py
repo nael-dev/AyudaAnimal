@@ -390,6 +390,7 @@ def create_checkout_session():
         return jsonify({'error': str(e)}), 400
 
 # -------------------- Email formularios --------------------
+
 @api.route("/send-email", methods=["POST"])
 def send_email():
     data = request.get_json()
@@ -409,7 +410,7 @@ def send_email():
             if not email:
                 return jsonify({"success": False, "error": "Falta email para enviar el correo de bienvenida"}), 400
 
-            subject = f"¡Bienvenido a Nuestra App, {name}!"
+            subject = f"¡Bienvenido a Ayuda Animal Jerez, {name}!"
             body = f"""
 Hola {name}!
 
@@ -447,7 +448,7 @@ Otros animales: {data.get('otherAnimals')}
 Solo en casa: {data.get('aloneInHome')}
 Motivo: {data.get('why')}
 """
-            # Envía a correo de testing o equipo
+            # Envía a correo del equipo o testing
             to_email = "anadiazpa@gmail.com"
 
         else:
@@ -455,10 +456,11 @@ Motivo: {data.get('why')}
 
         # ----- ENVÍO DEL CORREO -----
         payload = {
-            "from": "Testing <testing@resend.dev>",
+            "from": "Ayuda Animal Jerez <administracion@ayudaanimaljerez.es>",
             "to": [to_email],
             "subject": subject,
-            "text": body
+            "text": body,
+            "html": f"<p>{body.replace(chr(10), '<br>')}</p>"
         }
 
         response = requests.post(
