@@ -6,7 +6,9 @@ def send_email_verification(to_email, token):
     if not resend_api_key:
         raise Exception("Falta RESEND_API_KEY en las variables de entorno")
 
-    verification_link = f"https://payudaanimaljerez.onrender.com/verify-email/{token}"
+  
+    verification_link = f"https://payudaanimaljerez.onrender.com/api/verify-email/{token}"
+
 
     subject = "¡Bienvenido a Ayuda Animal Jerez!"
     body = f"""
