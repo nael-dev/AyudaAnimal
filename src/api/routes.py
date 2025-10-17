@@ -38,30 +38,38 @@ ph = PasswordHasher()
 
 @api.route('/signup', methods=['POST'])
 def create_user():
-    body = request.get_json()
-    required_fields = ['email', 'password']
-    if not all(field in body for field in required_fields):
-        return jsonify({'err': 'Bad request, missing email or password'}), 400
+    try:
+        body = request.get_json()
+        required_fields = ['email', 'password']
+        if not all(field in body for field in required_fields):
+            return jsonify({'err': 'Bad request, missing email or password'}), 400
 
-    if User.query.filter_by(email=body['email']).first():
-        return jsonify({"error": "User already exists"}), 409
+        if User.query.filter_by(email=body['email']).first():
+            return jsonify({"error": "User already exists"}), 409
 
-    hashed_password = ph.hash(body['password'])
-    verification_token = secrets.token_urlsafe(32)
+        hashed_password = ph.hash(body['password'])
+        verification_token = secrets.token_urlsafe(32)
 
-    user = User(
-        email=body['email'],
-        password=hashed_password,
-        name=body.get("name"),
-        verification_token=verification_token
-    )
-    db.session.add(user)
-    db.session.commit()
+        user = User(
+            email=body['email'],
+            password=hashed_password,
+            name=body.get("name"),
+            verification_token=verification_token
+        )
+        db.session.add(user)
+        db.session.commit()
 
-    # Enviar correo de verificación
-    send_email_verification(user.email, user.verification_token, user.name or "Usuario")
+        # Intentar enviar correo, pero capturar cualquier error para no romper el signup
+        try:
+            send_email_verification(user.email, user.verification_token, user.name or "Usuario")
+        except Exception as e:
+            print("Error enviando correo:", e)
 
-    return jsonify({'Ok': "User created, verification email sent"}), 201
+        return jsonify({'Ok': "User created, verification email sent"}), 201
+
+    except Exception as e:
+        print("ERROR SIGNUP:", e)
+        return jsonify({"error": str(e)}), 500
 
 
 
