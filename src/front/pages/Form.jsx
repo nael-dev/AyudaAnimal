@@ -9,7 +9,6 @@ export const Form = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState(null);
-  const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmError, setConfirmError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,18 +31,11 @@ export const Form = () => {
   }, []);
 
   // Validaciones
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     let valid = true;
-
-    // Validaciones
-    if (!validateEmail(email)) {
-      setEmailError("Email no válido");
-      valid = false;
-    } else setEmailError("");
 
     if (!validatePassword(password)) {
       setPasswordError("Mínimo 8 caracteres, mayúscula, minúscula y número");
@@ -58,8 +50,8 @@ export const Form = () => {
     if (!valid) return;
 
     try {
-      // Crear usuario
-      const signupRes = await fetch(`/api/signup`, {
+      // Crear usuario y enviar correo directamente desde backend
+      const signupRes = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -67,23 +59,7 @@ export const Form = () => {
       const signupData = await signupRes.json();
 
       if (signupRes.ok && signupData.Ok) {
-        // Generar link de verificación (puede venir del backend o generarse aquí)
-        const verificationToken = signupData.token || "dummy-token"; 
-        const verificationLink = `${window.location.origin}/verify-email?token=${verificationToken}`;
-
-        // Enviar correo de bienvenida
-        await fetch("/api/send-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            form_type: "welcome",
-            name: email.split("@")[0],
-            email,
-            verification_link: verificationLink,
-          }),
-        });
-
-       
+        // Backend envía el correo automáticamente
         navigate("/login");
       } else {
         setErrorMsg(signupData.error || "Error al crear usuario");
@@ -111,28 +87,19 @@ export const Form = () => {
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (!validateEmail(e.target.value)) setEmailError("Email no válido");
-                    else setEmailError("");
-                  }}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Ej. mizifu22@gmail.com"
                   required
                 />
                 <i className="fa-solid fa-envelope"></i>
               </div>
-              {emailError && <div className="input-error">{emailError}</div>}
 
               {/* Contraseña */}
               <div className="input-box position-relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (!validatePassword(e.target.value)) setPasswordError("Mínimo 8 caracteres, mayúscula, minúscula y número");
-                    else setPasswordError("");
-                  }}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="Ingresa tu contraseña"
                   required
                 />
@@ -151,14 +118,9 @@ export const Form = () => {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (e.target.value !== password) setConfirmError("Las contraseñas no coinciden");
-                    else setConfirmError("");
-                  }}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirma tu contraseña"
                   required
-                  
                 />
                 <i className="fa-solid fa-lock"></i>
                 <span
