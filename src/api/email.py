@@ -1,16 +1,16 @@
 import os
 import requests
 
-def send_email_verification(to_email, token, name):
+def send_email_verification(to_email, token):
     resend_api_key = os.getenv("RESEND_API_KEY")
     if not resend_api_key:
         raise Exception("Falta RESEND_API_KEY en las variables de entorno")
 
-    verification_link = f"https://payudaanimaljerez.onrender.com/verify?token={token}"
+    verification_link = f"https://payudaanimaljerez.onrender.com/verify-email/{token}"
 
-    subject = f"¡Bienvenido a Ayuda Animal Jerez, {name}!"
+    subject = "¡Bienvenido a Ayuda Animal Jerez!"
     body = f"""
-Hola {name}!
+Hola!
 
 Gracias por registrarte en nuestra plataforma 🐾.
 Por favor confirma tu correo haciendo clic en el siguiente enlace:

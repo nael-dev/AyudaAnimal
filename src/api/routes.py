@@ -53,15 +53,14 @@ def create_user():
         user = User(
             email=body['email'],
             password=hashed_password,
-            name=body.get("name"),
             verification_token=verification_token
         )
         db.session.add(user)
         db.session.commit()
 
-        # Intentar enviar correo, pero capturar cualquier error para no romper el signup
+        # Enviar correo de verificación
         try:
-            send_email_verification(user.email, user.verification_token, user.name or "Usuario")
+            send_email_verification(user.email, user.verification_token)
         except Exception as e:
             print("Error enviando correo:", e)
 
