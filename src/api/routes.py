@@ -421,16 +421,21 @@ def send_email():
     try:
         # ----- CORREO DE BIENVENIDA -----
         if form_type == "welcome":
-            name = data.get("name", "Usuario")
             email = data.get("email")
-            verification_link = data.get("verification_link", "#")
-
             if not email:
                 return jsonify({"success": False, "error": "Falta email para enviar el correo de bienvenida"}), 400
 
-            subject = f"¡Bienvenido a Ayuda Animal Jerez, {name}!"
+            # Obtenemos el usuario desde la base de datos
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
+
+            # Generamos el link de verificación
+            verification_link = f"https://payudaanimaljerez.onrender.com/api/verify-email/{user.verification_token}"
+
+            subject = "¡Bienvenido a Ayuda Animal Jerez!"
             body = f"""
-Hola {name}!
+Hola!
 
 Gracias por registrarte en nuestra plataforma 🐾.
 Por favor confirma tu correo haciendo clic en el siguiente enlace:
@@ -440,34 +445,6 @@ Por favor confirma tu correo haciendo clic en el siguiente enlace:
 ¡Esperamos que disfrutes de la experiencia!
 """
             to_email = email
-
-        # ----- FORMULARIO DE ACOGIDA O ADOPCIÓN -----
-        elif form_type in ["acogida", "adoption"]:
-            required_fields = ["name", "age", "phone", "email", "city", "dwelling",
-                               "access", "company", "child", "otherAnimals", "aloneInHome", "why"]
-            missing_fields = [f for f in required_fields if f not in data]
-            if missing_fields:
-                return jsonify({"success": False, "error": f"Faltan campos: {', '.join(missing_fields)}"}), 400
-
-            name = data.get("name")
-            email = data.get("email")
-            subject = f"Nuevo formulario de {'acogida' if form_type == 'acogida' else 'adopción'} de {name}"
-            body = f"""
-Nombre: {name}
-Edad: {data.get('age')}
-Teléfono: {data.get('phone')}
-Email: {email}
-Ciudad: {data.get('city')}
-Vivienda: {data.get('dwelling')}
-Acceso: {data.get('access')}
-Compañía: {data.get('company')}
-Niños: {data.get('child')}
-Otros animales: {data.get('otherAnimals')}
-Solo en casa: {data.get('aloneInHome')}
-Motivo: {data.get('why')}
-"""
-            # Envía a correo del equipo o testing
-            to_email = "anadiazpa@gmail.com"
 
         else:
             return jsonify({"success": False, "error": "Tipo de formulario no válido"}), 400
@@ -490,9 +467,6 @@ Motivo: {data.get('why')}
             json=payload
         )
 
-        print("Resend response status:", response.status_code)
-        print("Resend response body:", response.text)
-
         if response.status_code in [200, 202]:
             return jsonify({"success": True, "message": "Correo enviado correctamente"}), 200
         else:
@@ -505,16 +479,21 @@ Motivo: {data.get('why')}
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+
+
   # ----- VERIFICACION EMAIL -----
+
+
 @api.route('/verify-email/<token>', methods=['GET'])
 def verify_email(token):
     user = User.query.filter_by(verification_token=token).first()
     if not user:
-        return jsonify({"error": "Token inválido"}), 400
+        # Redirigir a frontend con mensaje de error
+        return redirect("https://payudaanimaljerez.onrender.com/login?verified=false")
 
     user.is_verified = True
     user.verification_token = None  # eliminar token tras verificar
     db.session.commit()
 
-    # Redirigir al login de tu web
-    return redirect("https://payudaanimaljerez.onrender.com/login")
+    # Redirigir al login con parámetro de éxito
+    return redirect("https://payudaanimaljerez.onrender.com/login?verified=true")
