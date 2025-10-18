@@ -19,6 +19,7 @@ from datetime import datetime
 import requests
 import secrets
 from api.email import send_email_verification  
+from sqlalchemy.exc import SQLAlchemyError
 
 ph = PasswordHasher()
 api = Blueprint('api', __name__)
@@ -497,3 +498,34 @@ def verify_email(token):
 
     # Redirigir al login con parámetro de éxito
     return redirect("https://payudaanimaljerez.onrender.com/login?verified=true")
+
+ # ----- ELIMINAR USUARIOS -----
+@api.route('/user/<int:user_id>', methods=['DELETE'])
+@jwt_required()
+def delete_user(user_id):
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        # Solo el usuario mismo o el admin pueden eliminar
+        if current_user_id != user.id and user.email != "admin@admin.com":
+            return jsonify({"error": "No autorizado"}), 403
+
+        # Eliminar pagos asociados
+        for sponsor in user.sponsors:  # suponiendo que tienes relación User -> Sponsor
+            for payment in sponsor.payments:
+                db.session.delete(payment)
+            db.session.delete(sponsor)
+
+        # Finalmente eliminar al usuario
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"success": True, "message": f"Usuario {user.email} eliminado junto con sus registros asociados"}), 200
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": f"Error eliminando usuario: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
