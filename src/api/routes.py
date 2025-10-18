@@ -54,7 +54,8 @@ def create_user():
         user = User(
             email=body['email'],
             password=hashed_password,
-            verification_token=verification_token
+            verification_token=verification_token,
+            is_verified=False
         )
         db.session.add(user)
         db.session.commit()
@@ -65,13 +66,11 @@ def create_user():
         except Exception as e:
             print("Error enviando correo:", e)
 
-        return jsonify({'Ok': "User created, verification email sent"}), 201
+        return jsonify({'ok': "User created, verification email sent"}), 201
 
     except Exception as e:
         print("ERROR SIGNUP:", e)
         return jsonify({"error": str(e)}), 500
-
-
 
 @api.route('/login', methods=['POST'])
 def login():
@@ -489,35 +488,29 @@ Por favor confirma tu correo haciendo clic en el siguiente enlace:
 def verify_email(token):
     user = User.query.filter_by(verification_token=token).first()
     if not user:
-        # Redirigir a frontend con mensaje de error
-        return redirect("https://payudaanimaljerez.onrender.com/login?verified=false")
+        return jsonify({"error": "Token inválido"}), 400
 
     user.is_verified = True
-    user.verification_token = None  # eliminar token tras verificar
+    user.verification_token = None
     db.session.commit()
 
-    # Redirigir al login con parámetro de éxito
-    return redirect("https://payudaanimaljerez.onrender.com/login?verified=true")
+    # Redirige al login del frontend
+    return redirect("https://payudaanimaljerez.onrender.com/login")
 
  # ----- ELIMINAR USUARIOS -----
 @api.route('/user/<int:user_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user(user_id):
     current_user_id = get_jwt_identity()
-    admin_user = db.session.get(User, current_user_id)
+    current_user = User.query.get(current_user_id)
 
-    # Verificar si es admin
-    if not admin_user or admin_user.email != 'admin@admin.com':
-        return jsonify({"error": "Unauthorized, only admin can delete users"}), 403
+    if not current_user or current_user.email != 'admin@admin.com':
+        return jsonify({"error": "No autorizado"}), 403
 
-    user_to_delete = db.session.get(User, user_id)
-    if not user_to_delete:
-        return jsonify({"error": "User not found"}), 404
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "Usuario no encontrado"}), 404
 
-    try:
-        db.session.delete(user_to_delete)
-        db.session.commit()
-        return jsonify({"message": f"User {user_to_delete.email} deleted successfully"}), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({"ok": f"Usuario {user.email} eliminado"}), 200
