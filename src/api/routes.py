@@ -495,7 +495,8 @@ def verify_email(token):
     db.session.commit()
 
     # Redirige al login del frontend
-    return redirect("https://payudaanimaljerez.onrender.com/login")
+    return "<h1>Email verificado correctamente. Ya puedes cerrar esta ventana y entrar a la web.</h1>"
+
 
  # ----- ELIMINAR USUARIOS -----
 @api.route('/user/<int:user_id>', methods=['DELETE'])
