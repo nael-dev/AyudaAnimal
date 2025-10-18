@@ -503,29 +503,21 @@ def verify_email(token):
 @api.route('/user/<int:user_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user(user_id):
+    current_user_id = get_jwt_identity()
+    admin_user = db.session.get(User, current_user_id)
+
+    # Verificar si es admin
+    if not admin_user or admin_user.email != 'admin@admin.com':
+        return jsonify({"error": "Unauthorized, only admin can delete users"}), 403
+
+    user_to_delete = db.session.get(User, user_id)
+    if not user_to_delete:
+        return jsonify({"error": "User not found"}), 404
+
     try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(user_id)
-        if not user:
-            return jsonify({"error": "Usuario no encontrado"}), 404
-
-        # Solo el usuario mismo o el admin pueden eliminar
-        if current_user_id != user.id and user.email != "admin@admin.com":
-            return jsonify({"error": "No autorizado"}), 403
-
-        # Eliminar pagos asociados
-        for sponsor in user.sponsors:  # suponiendo que tienes relación User -> Sponsor
-            for payment in sponsor.payments:
-                db.session.delete(payment)
-            db.session.delete(sponsor)
-
-        # Finalmente eliminar al usuario
-        db.session.delete(user)
+        db.session.delete(user_to_delete)
         db.session.commit()
-        return jsonify({"success": True, "message": f"Usuario {user.email} eliminado junto con sus registros asociados"}), 200
-
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        return jsonify({"error": f"Error eliminando usuario: {str(e)}"}), 500
+        return jsonify({"message": f"User {user_to_delete.email} deleted successfully"}), 200
     except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
